@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fleet Maintenance — PTFI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CONFIG — isi ini sebelum deploy
+   ============================================================ */
+:root{
+  --bg:#12161C; --surface:#1B212B; --surface2:#222B36; --border:#2A3340;
+  --text:#E8EDF2; --muted:#8A96A3; --amber:#F2A93B; --amber-dim:#7A5A20;
+  --green:#4CAF7D; --green-bg:#193325; --red:#E5533D; --red-bg:#33201B;
+  --blue:#4A90D9; --radius:10px;
+  --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased; padding-bottom:76px; min-height:100vh;
+}
+button, input, select, textarea{font-family:inherit; color:inherit;}
+::-webkit-scrollbar{display:none;}
+
+/* Top bar */
+.topbar{
+  position:sticky; top:0; z-index:20; background:rgba(18,22,28,0.92); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+}
+.brand{display:flex; align-items:center; gap:9px;}
+.brand-mark{width:28px; height:28px; border-radius:7px; background:var(--amber); display:flex; align-items:center; justify-content:center;}
+.brand-mark svg{width:16px; height:16px;}
+.brand-text{font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:-0.2px;}
+.brand-sub{font-size:10.5px; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase;}
+.sync-pill{
+  display:flex; align-items:center; gap:6px; font-size:11px; padding:5px 10px; border-radius:20px;
+  background:var(--surface2); border:1px solid var(--border); color:var(--muted); cursor:pointer;
+}
+.sync-dot{width:6px; height:6px; border-radius:50%; background:var(--muted);}
+.sync-pill.ok .sync-dot{background:var(--green);}
+.sync-pill.err .sync-dot{background:var(--red);}
+.sync-pill.busy .sync-dot{background:var(--amber); animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.screen{display:none; padding:18px 16px 24px; max-width:640px; margin:0 auto;}
+.screen.active{display:block;}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+.section-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.section-note{font-size:12px; color:var(--muted);}
+
+/* Login gate */
+.gate{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  padding:60px 24px; gap:14px;
+}
+.gate-icon{width:56px; height:56px; border-radius:14px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:6px;}
+.gate h1{font-family:var(--font-display); font-size:20px; font-weight:600;}
+.gate p{font-size:13.5px; color:var(--muted); line-height:1.6; max-width:320px;}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 20px; border-radius:var(--radius); border:1px solid var(--border);
+  background:var(--surface2); font-size:14px; font-weight:500; cursor:pointer; transition:transform .1s;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--amber); border-color:var(--amber); color:#1A1200;}
+.btn-full{width:100%;}
+.btn-danger{background:var(--red-bg); border-color:#5A2C24; color:#F0968A;}
+
+/* Metric cards */
+.metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;}
+.metric-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px;}
+.metric-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px;}
+.metric-value{font-family:var(--font-mono); font-size:26px; font-weight:700;}
+.metric-value.amber{color:var(--amber);}
+.metric-value.red{color:var(--red);}
+.metric-value.green{color:var(--green);}
+
+/* Odometer signature */
+.odometer{display:flex; gap:3px; font-family:var(--font-mono);}
+.odo-digit{
+  background:#0A0D12; border:1px solid var(--border); border-radius:4px;
+  width:26px; height:34px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:700; color:var(--amber);
+}
+
+/* Cards / lists */
+.card-list{display:flex; flex-direction:column; gap:10px;}
+.item-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:14px; cursor:pointer; transition:border-color .15s;
+}
+.item-card:active{border-color:var(--amber);}
+.item-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.item-title{font-weight:600; font-size:14.5px;}
+.item-sub{font-size:12px; color:var(--muted); margin-top:3px;}
+.plate{
+  font-family:var(--font-mono); font-weight:700; font-size:13px; background:var(--surface2);
+  border:1px solid var(--border); padding:3px 8px; border-radius:5px; letter-spacing:0.5px;
+}
+.badge{font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;}
+.badge-ok{background:var(--green-bg); color:var(--green);}
+.badge-warn{background:var(--red-bg); color:var(--red);}
+.badge-idle{background:var(--surface2); color:var(--muted);}
+
+.empty-state{text-align:center; padding:50px 20px; color:var(--muted);}
+.empty-state svg{width:36px; height:36px; margin-bottom:10px; opacity:0.5;}
+.empty-state p{font-size:13px; line-height:1.6;}
+
+/* Forms */
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:500;}
+.field input, .field select, .field textarea{
+  width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:11px 12px; font-size:14px; outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--amber);}
+.field textarea{resize:vertical; min-height:70px;}
+.field-row{display:flex; gap:10px;}
+.field-row .field{flex:1;}
+
+/* Modal / detail sheet */
+.sheet-overlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:50;
+  align-items:flex-end; justify-content:center;
+}
+.sheet-overlay.active{display:flex;}
+.sheet{
+  background:var(--bg); border-radius:16px 16px 0 0; width:100%; max-width:640px;
+  max-height:88vh; overflow-y:auto; padding:18px 16px 28px; border-top:1px solid var(--border);
+}
+.sheet-handle{width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 16px;}
+.sheet-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+.sheet-title{font-family:var(--font-display); font-weight:600; font-size:17px;}
+.icon-btn{width:30px; height:30px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+
+/* Tabs (segmented) */
+.seg{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:3px; margin-bottom:16px;}
+.seg-btn{flex:1; text-align:center; padding:8px 4px; font-size:12.5px; font-weight:500; color:var(--muted); border-radius:7px; cursor:pointer;}
+.seg-btn.active{background:var(--amber); color:#1A1200; font-weight:600;}
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:20; background:rgba(18,22,28,0.95); backdrop-filter:blur(10px);
+  border-top:1px solid var(--border); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.nav-btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px;
+  color:var(--muted); cursor:pointer; border-radius:9px;
+}
+.nav-btn svg{width:20px; height:20px;}
+.nav-btn span{font-size:10px; font-weight:500;}
+.nav-btn.active{color:var(--amber);}
+
+.fab{
+  position:fixed; bottom:88px; right:18px; z-index:15; width:52px; height:52px; border-radius:50%;
+  background:var(--amber); color:#1A1200; display:flex; align-items:center; justify-content:center;
+  border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.4);
+}
+.fab svg{width:24px; height:24px;}
+
+.toast{
+  position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:60;
+  background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius);
+  padding:10px 16px; font-size:13px; display:none; align-items:center; gap:8px;
+}
+.toast.show{display:flex;}
+.toast.err{border-color:#5A2C24; color:#F0968A;}
+.toast.ok{border-color:#1F4A34; color:var(--green);}
+
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A1200" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4M3 17a2 2 0 1 0 4 0M16 17a2 2 0 1 0 4 0"/></svg>
+    </div>
+    <div>
+      <div class="brand-text">Fleet Maintenance</div>
+      <div class="brand-sub">PTFI</div>
+    </div>
+  </div>
+  <div class="sync-pill" id="syncPill" onclick="handleSyncClick()">
+    <div class="sync-dot"></div>
+    <span id="syncLabel">offline</span>
+  </div>
+</div>
+
+<!-- LOGIN GATE -->
+<div class="screen active" id="screen-gate">
+  <div class="gate">
+    <div class="gate-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8A96A3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1>Siapa nama Anda?</h1>
+    <p>Nama ini dipakai untuk menandai siapa yang mencatat data. Data tersimpan bersama lewat Google Sheet tim, tidak perlu login.</p>
+    <input id="nameInput" placeholder="Nama Anda" style="width:100%; max-width:280px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 12px; font-size:14px; text-align:center;">
+    <button class="btn btn-primary" onclick="login()" style="margin-top:4px;">Mulai</button>
+    <p id="gateError" style="color:var(--red); font-size:12px; display:none;"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="screen-dashboard">
+  <div class="section-head">
+    <div>
+      <div class="section-title">Dashboard</div>
+      <div class="section-note" id="dashDate"></div>
+    </div>
+  </div>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-label">Total kendaraan</div>
+      <div class="metric-value" id="mVehicles">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Laporan terbuka</div>
+      <div class="metric-value red" id="mOpenReports">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Servis 30 hari ini</div>
+      <div class="metric-value amber" id="mRecentService">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">KM tercatat bulan ini</div>
+      <div class="metric-value green" id="mKmThisMonth">0</div>
+    </div>
+  </div>
+  <div class="section-head"><div class="section-title" style="font-size:14px;">Laporan abnormal terbaru</div></div>
+  <div class="card-list" id="dashReportsList"></div>
+</div>
+
+<!-- ARMADA -->
+<div class="screen" id="screen-armada">
+  <div class="section-head">
+    <div class="section-title">Armada</div>
+    <button class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
+  </div>
+  <div class="card-list" id="vehicleList"></div>
+</div>
+
+<!-- CATAT KM -->
+<div class="screen" id="screen-km">
+  <div class="section-head">
+    <div class="section-title">Catat KM</div>
+  </div>
+  <div class="field">
+    <label>Pilih kendaraan</label>
+    <select id="kmVehicleSelect" onchange="renderKmHistory()"></select>
+  </div>
+  <div class="field">
+    <label>KM saat ini</label>
+    <input type="number" id="kmInput" placeholder="cth. 45210" inputmode="numeric">
+  </div>
+  <div class="field">
+    <label>Catatan (opsional)</label>
+    <input type="text" id="kmNote" placeholder="cth. isi solar full tank">
+  </div>
+  <button class="btn btn-primary btn-full" onclick="submitKm()">Simpan catatan KM</button>
+  <div class="section-head" style="margin-top:24px;"><div class="section-title" style="font-size:14px;">Riwayat KM</div></div>
+  <div class="card-list" id="kmHistoryList"></div>
+</div>
+
+<!-- SERVIS -->
+<div class="screen" id="screen-servis">
+  <div class="section-head">
+    <div class="section-title">Riwayat servis</div>
+    <button class="btn" onclick="openServiceForm()">+ Servis</button>
+  </div>
+  <div class="card-list" id="serviceList"></div>
+</div>
+
+<!-- LAPORAN -->
+<div class="screen" id="screen-laporan">
+  <div class="section-head">
+    <div class="section-title">Laporan abnormal</div>
+    <button class="btn" onclick="openReportForm()">+ Laporan</button>
+  </div>
+  <div class="seg" id="reportFilterSeg">
+    <div class="seg-btn active" data-f="all" onclick="setReportFilter('all')">Semua</div>
+    <div class="seg-btn" data-f="open" onclick="setReportFilter('open')">Terbuka</div>
+    <div class="seg-btn" data-f="selesai" onclick="setReportFilter('selesai')">Selesai</div>
+  </div>
+  <div class="card-list" id="reportList"></div>
+</div>
+
+<button class="fab hidden" id="fab" onclick="handleFab()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<div class="bottom-nav hidden" id="bottomNav">
+  <div class="nav-btn active" data-screen="dashboard" onclick="goTo('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+    <span>Dashboard</span>
+  </div>
+  <div class="nav-btn" data-screen="armada" onclick="goTo('armada')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>
+    <span>Armada</span>
+  </div>
+  <div class="nav-btn" data-screen="km" onclick="goTo('km')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+    <span>KM</span>
+  </div>
+  <div class="nav-btn" data-screen="servis" onclick="goTo('servis')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>
+    <span>Servis</span>
+  </div>
+  <div class="nav-btn" data-screen="laporan" onclick="goTo('laporan')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 2.7 17a1.8 1.8 0 0 0 1.5 2.7h15.6a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/><path d="M12 9v4M12 16.5v.01"/></svg>
+    <span>Laporan</span>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheetOverlay" onclick="if(event.target===this) closeSheet()">
+  <div class="sheet" id="sheetContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG — WAJIB DIISI SEBELUM DEPLOY
+   ============================================================
+   scriptUrl : URL Web App dari Google Apps Script.
+   Caranya:
+   1. Buat Google Sheet baru
+   2. Extensions > Apps Script, tempel kode dari file apps-script.gs
+   3. Deploy > New deployment > Web app
+      - Execute as: Me
+      - Who has access: Anyone
+      - Deploy, lalu izinkan akses saat diminta
+   4. Salin "Web app URL" yang muncul, tempel di bawah ini
+*/
+const CONFIG = {
+  scriptUrl: "https://script.google.com/macros/s/AKfycby4L-W017kDP7XCjaAPOrZmYQDne2N_1hv6fT5O7yPG0Ovzv0ZvY7Ukh6WvNE1hM5jS/exec",
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let DB = { vehicles: [], kmLogs: [], services: [], reports: [] };
+let currentUserName = "Pengguna";
+let reportFilter = "all";
+let activeScreen = "dashboard";
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function fmtDate(d){ return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + (type||'');
+  setTimeout(()=>{ t.className='toast'; }, 2600);
+}
+
+/* ============================================================
+   MASUK — cukup isi nama, tidak perlu login akun
+   ============================================================ */
+function login(){
+  const name = document.getElementById('nameInput').value.trim();
+  if(!name){ 
+    document.getElementById('gateError').textContent = "Isi nama Anda dulu.";
+    document.getElementById('gateError').style.display = 'block';
+    return;
+  }
+  if(CONFIG.scriptUrl.startsWith("ISI_")){
+    document.getElementById('gateError').textContent = "Aplikasi belum dikonfigurasi: URL Apps Script belum diisi admin.";
+    document.getElementById('gateError').style.display = 'block';
+    return;
+  }
+  currentUserName = name;
+  afterLogin();
+}
+
+function afterLogin(){
+  document.getElementById('screen-gate').classList.remove('active');
+  document.getElementById('bottomNav').classList.remove('hidden');
+  document.getElementById('fab').classList.remove('hidden');
+  goTo('dashboard');
+  syncFromSheet();
+}
+
+/* ============================================================
+   SYNC — via Google Apps Script Web App (backend = Google Sheet)
+   ============================================================ */
+function setSyncStatus(state, label){
+  const pill = document.getElementById('syncPill');
+  pill.className = 'sync-pill ' + state;
+  document.getElementById('syncLabel').textContent = label;
+}
+
+async function syncFromSheet(){
+  if(CONFIG.scriptUrl.startsWith("ISI_")){
+    setSyncStatus('err', 'belum diatur');
+    return;
+  }
+  setSyncStatus('busy', 'menyinkronkan…');
+  try{
+    const res = await fetch(CONFIG.scriptUrl);
+    if(!res.ok) throw new Error("Gagal mengambil data (" + res.status + ")");
+    const parsed = await res.json();
+    DB = {
+      vehicles: (parsed.vehicles || []).map(normalizeRow),
+      kmLogs: (parsed.kmLogs || []).map(normalizeRow),
+      services: (parsed.services || []).map(normalizeRow),
+      reports: (parsed.reports || []).map(normalizeRow)
+    };
+    setSyncStatus('ok', 'tersinkron');
+    renderAll();
+  }catch(e){
+    setSyncStatus('err', 'gagal sinkron');
+    showToast('Sinkron gagal: ' + e.message, 'err');
+  }
+}
+
+function normalizeRow(row){
+  if('km' in row) row.km = row.km === '' ? null : Number(row.km);
+  if('biaya' in row) row.biaya = row.biaya === '' ? 0 : Number(row.biaya);
+  return row;
+}
+
+async function saveToSheet(){
+  setSyncStatus('busy', 'menyimpan…');
+  try{
+    const res = await fetch(CONFIG.scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(DB)
+    });
+    if(!res.ok) throw new Error("Gagal menyimpan (" + res.status + ")");
+    setSyncStatus('ok', 'tersinkron');
+  }catch(e){
+    setSyncStatus('err', 'gagal simpan');
+    showToast('Gagal menyimpan ke Google Sheet: ' + e.message, 'err');
+  }
+}
+
+function handleSyncClick(){ syncFromSheet(); }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goTo(screen){
+  activeScreen = screen;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===screen));
+  renderAll();
+}
+
+function handleFab(){
+  if(activeScreen==='armada') openVehicleForm();
+  else if(activeScreen==='servis') openServiceForm();
+  else if(activeScreen==='laporan') openReportForm();
+  else goTo('km');
+}
+
+/* ============================================================
+   SHEET (bottom modal for forms/detail)
+   ============================================================ */
+function openSheet(html){
+  document.getElementById('sheetContent').innerHTML = `<div class="sheet-handle"></div>` + html;
+  document.getElementById('sheetOverlay').classList.add('active');
+}
+function closeSheet(){ document.getElementById('sheetOverlay').classList.remove('active'); }
+
+/* ============================================================
+   VEHICLES
+   ============================================================ */
+function openVehicleForm(existing){
+  const v = existing || {};
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">${existing ? 'Ubah kendaraan' : 'Tambah kendaraan'}</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <div class="field"><label>Plat nomor</label><input id="fPlat" value="${v.plat||''}" placeholder="cth. N 1757 TA"></div>
+    <div class="field-row">
+      <div class="field"><label>Jenis</label><input id="fJenis" value="${v.jenis||''}" placeholder="cth. Pickup / Dump Truck"></div>
+      <div class="field"><label>Merk / model</label><input id="fMerk" value="${v.merk||''}" placeholder="cth. Toyota Hilux"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Tahun</label><input id="fTahun" type="number" value="${v.tahun||''}" placeholder="2019"></div>
+      <div class="field"><label>Lokasi/area</label><input id="fLokasi" value="${v.lokasi||''}" placeholder="cth. Smelter A"></div>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="fStatus">
+        <option value="aktif" ${v.status==='aktif'?'selected':''}>Aktif</option>
+        <option value="idle" ${v.status==='idle'?'selected':''}>Idle</option>
+        <option value="perbaikan" ${v.status==='perbaikan'?'selected':''}>Dalam perbaikan</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveVehicle('${v.id||''}')">Simpan</button>
+    ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deleteVehicle('${v.id}')">Hapus kendaraan</button>` : ''}
+  `);
+}
+
+function saveVehicle(id){
+  const plat = document.getElementById('fPlat').value.trim();
+  if(!plat){ showToast('Plat nomor wajib diisi', 'err'); return; }
+  const data = {
+    plat, jenis: document.getElementById('fJenis').value.trim(),
+    merk: document.getElementById('fMerk').value.trim(),
+    tahun: document.getElementById('fTahun').value.trim(),
+    lokasi: document.getElementById('fLokasi').value.trim(),
+    status: document.getElementById('fStatus').value
+  };
+  if(id){
+    const v = DB.vehicles.find(x=>x.id===id);
+    Object.assign(v, data);
+  } else {
+    DB.vehicles.push({ id: uid(), ...data });
+  }
+  closeSheet(); renderAll(); saveToSheet();
+  showToast('Kendaraan disimpan', 'ok');
+}
+
+function deleteVehicle(id){
+  DB.vehicles = DB.vehicles.filter(v=>v.id!==id);
+  closeSheet(); renderAll(); saveToSheet();
+}
+
+function renderVehicles(){
+  const list = document.getElementById('vehicleList');
+  if(!DB.vehicles.length){
+    list.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>
+      <p>Belum ada kendaraan.<br>Tambahkan kendaraan pertama untuk mulai mencatat.</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = DB.vehicles.map(v=>{
+    const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
+    const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
+    return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(v).replace(/'/g,"&apos;")})'>
+      <div class="item-row">
+        <div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}">${v.status}</span></div>
+          <div class="item-sub">${[v.merk,v.jenis,v.tahun].filter(Boolean).join(' · ')||'-'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub">${v.lokasi||''}</div>
+          <div class="item-sub" style="font-family:var(--font-mono); color:var(--text); margin-top:2px;">${lastKm ? lastKm.km.toLocaleString('id-ID')+' km' : 'belum ada KM'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function populateVehicleSelect(){
+  const sel = document.getElementById('kmVehicleSelect');
+  const current = sel.value;
+  sel.innerHTML = DB.vehicles.map(v=>`<option value="${v.id}">${v.plat} — ${v.jenis||v.merk||''}</option>`).join('');
+  if(current) sel.value = current;
+}
+
+/* ============================================================
+   KM LOGS
+   ============================================================ */
+function submitKm(){
+  const vehicleId = document.getElementById('kmVehicleSelect').value;
+  const km = parseInt(document.getElementById('kmInput').value, 10);
+  if(!vehicleId){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  if(!km || km < 0){ showToast('Isi angka KM yang valid', 'err'); return; }
+  DB.kmLogs.push({
+    id: uid(), vehicleId, km, tanggal: todayStr(),
+    catatan: document.getElementById('kmNote').value.trim(),
+    dicatatOleh: currentUserName
+  });
+  document.getElementById('kmInput').value = '';
+  document.getElementById('kmNote').value = '';
+  renderAll(); saveToSheet();
+  showToast('KM tersimpan', 'ok');
+}
+
+function renderKmHistory(){
+  const vehicleId = document.getElementById('kmVehicleSelect').value;
+  const list = document.getElementById('kmHistoryList');
+  const logs = DB.kmLogs.filter(k=>k.vehicleId===vehicleId).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(!logs.length){
+    list.innerHTML = `<div class="empty-state"><p>Belum ada catatan KM untuk kendaraan ini.</p></div>`;
+    return;
+  }
+  list.innerHTML = logs.map(k=>`
+    <div class="item-card" style="cursor:default;">
+      <div class="item-row">
+        <div>
+          <div class="item-title" style="font-family:var(--font-mono);">${k.km.toLocaleString('id-ID')} km</div>
+          <div class="item-sub">${k.catatan || '—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub">${fmtDate(k.tanggal)}</div>
+          <div class="item-sub">${k.dicatatOleh||''}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ============================================================
+   SERVICE HISTORY
+   ============================================================ */
+function openServiceForm(){
+  if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">Catat servis</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <div class="field"><label>Kendaraan</label>
+      <select id="sVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat}</option>`).join('')}</select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Tanggal</label><input id="sTanggal" type="date" value="${todayStr()}"></div>
+      <div class="field"><label>KM saat servis</label><input id="sKm" type="number" placeholder="cth. 45210"></div>
+    </div>
+    <div class="field"><label>Jenis servis</label><input id="sJenis" placeholder="cth. Servis berkala / Ganti oli / Perbaikan rem"></div>
+    <div class="field"><label>Item / suku cadang diganti</label><textarea id="sItem" placeholder="cth. Oli mesin, filter oli, filter udara"></textarea>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Bengkel</label><input id="sBengkel" placeholder="cth. Auto2000 Manyar"></div>
+      <div class="field"><label>Biaya (Rp)</label><input id="sBiaya" type="number" placeholder="0"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveService()">Simpan servis</button>
+  `);
+}
+
+function saveService(){
+  const vehicleId = document.getElementById('sVehicle').value;
+  const jenis = document.getElementById('sJenis').value.trim();
+  if(!jenis){ showToast('Isi jenis servis', 'err'); return; }
+  DB.services.push({
+    id: uid(), vehicleId,
+    tanggal: document.getElementById('sTanggal').value || todayStr(),
+    km: parseInt(document.getElementById('sKm').value,10) || null,
+    jenis, item: document.getElementById('sItem').value.trim(),
+    bengkel: document.getElementById('sBengkel').value.trim(),
+    biaya: parseInt(document.getElementById('sBiaya').value,10) || 0,
+    dicatatOleh: currentUserName
+  });
+  closeSheet(); renderAll(); saveToSheet();
+  showToast('Servis tersimpan', 'ok');
+}
+
+function renderServices(){
+  const list = document.getElementById('serviceList');
+  const items = [...DB.services].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(!items.length){
+    list.innerHTML = `<div class="empty-state"><p>Belum ada riwayat servis.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(s=>{
+    const v = DB.vehicles.find(x=>x.id===s.vehicleId);
+    return `<div class="item-card" style="cursor:default;">
+      <div class="item-row">
+        <div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="item-title">${s.jenis}</span></div>
+          <div class="item-sub">${s.item || '—'}</div>
+          <div class="item-sub">${s.bengkel||''}${s.km?' · '+s.km.toLocaleString('id-ID')+' km':''}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub">${fmtDate(s.tanggal)}</div>
+          ${s.biaya?`<div class="item-sub" style="color:var(--text);">Rp ${s.biaya.toLocaleString('id-ID')}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   ABNORMAL REPORTS
+   ============================================================ */
+function openReportForm(){
+  if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">Laporan abnormal</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <div class="field"><label>Kendaraan</label>
+      <select id="rVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Tingkat</label>
+      <select id="rTingkat">
+        <option value="ringan">Ringan</option>
+        <option value="sedang">Sedang</option>
+        <option value="berat">Berat</option>
+      </select>
+    </div>
+    <div class="field"><label>Deskripsi masalah</label><textarea id="rDesk" placeholder="cth. Getar mesin saat idle, suara kasar dari roda depan kiri"></textarea></div>
+    <div class="field"><label>Link foto (opsional)</label><input id="rFoto" placeholder="Tempel link Google Drive foto"></div>
+    <button class="btn btn-primary btn-full" onclick="saveReport()">Kirim laporan</button>
+  `);
+}
+
+function saveReport(){
+  const desk = document.getElementById('rDesk').value.trim();
+  if(!desk){ showToast('Isi deskripsi masalah', 'err'); return; }
+  DB.reports.push({
+    id: uid(), vehicleId: document.getElementById('rVehicle').value,
+    tingkat: document.getElementById('rTingkat').value,
+    deskripsi: desk, fotoLink: document.getElementById('rFoto').value.trim(),
+    status: 'open', tanggal: todayStr(), dilaporkanOleh: currentUserName
+  });
+  closeSheet(); renderAll(); saveToSheet();
+  showToast('Laporan terkirim', 'ok');
+}
+
+function toggleReportStatus(id){
+  const r = DB.reports.find(x=>x.id===id);
+  r.status = r.status==='open' ? 'selesai' : 'open';
+  closeSheet(); renderAll(); saveToSheet();
+}
+
+function openReportDetail(id){
+  const r = DB.reports.find(x=>x.id===id);
+  const v = DB.vehicles.find(x=>x.id===r.vehicleId);
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">${v?v.plat:'?'}</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:4px;">Dilaporkan ${fmtDate(r.tanggal)} oleh ${r.dilaporkanOleh}</p>
+    <p style="font-size:14px; line-height:1.6; margin:10px 0;">${r.deskripsi}</p>
+    ${r.fotoLink ? `<a href="${r.fotoLink}" target="_blank" style="font-size:13px; color:var(--blue);">Lihat foto →</a>` : ''}
+    <button class="btn btn-full" style="margin-top:16px;" onclick="toggleReportStatus('${r.id}')">
+      Tandai sebagai ${r.status==='open'?'selesai':'terbuka lagi'}
+    </button>
+  `);
+}
+
+function setReportFilter(f){
+  reportFilter = f;
+  document.querySelectorAll('#reportFilterSeg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  renderReports();
+}
+
+function renderReports(){
+  const list = document.getElementById('reportList');
+  let items = [...DB.reports].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(reportFilter!=='all') items = items.filter(r=>r.status===reportFilter);
+  if(!items.length){
+    list.innerHTML = `<div class="empty-state"><p>Tidak ada laporan.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(r=>{
+    const v = DB.vehicles.find(x=>x.id===r.vehicleId);
+    const badge = r.status==='open' ? 'badge-warn' : 'badge-ok';
+    return `<div class="item-card" onclick="openReportDetail('${r.id}')">
+      <div class="item-row">
+        <div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="badge ${badge}">${r.status}</span></div>
+          <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>70?r.deskripsi.slice(0,70)+'…':r.deskripsi}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub">${fmtDate(r.tanggal)}</div>
+          <div class="item-sub" style="text-transform:capitalize;">${r.tingkat}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function renderDashboard(){
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('mVehicles').textContent = DB.vehicles.length;
+  document.getElementById('mOpenReports').textContent = DB.reports.filter(r=>r.status==='open').length;
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  document.getElementById('mRecentService').textContent = DB.services.filter(s=>new Date(s.tanggal).getTime()>=cutoff).length;
+  const monthPrefix = todayStr().slice(0,7);
+  document.getElementById('mKmThisMonth').textContent = DB.kmLogs.filter(k=>k.tanggal.startsWith(monthPrefix)).length;
+
+  const list = document.getElementById('dashReportsList');
+  const open = [...DB.reports].filter(r=>r.status==='open').sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,4);
+  if(!open.length){
+    list.innerHTML = `<div class="empty-state"><p>Tidak ada laporan terbuka. Armada dalam kondisi baik.</p></div>`;
+    return;
+  }
+  list.innerHTML = open.map(r=>{
+    const v = DB.vehicles.find(x=>x.id===r.vehicleId);
+    return `<div class="item-card" onclick="goTo('laporan')">
+      <div class="item-row">
+        <div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="badge badge-warn">${r.tingkat}</span></div>
+          <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>60?r.deskripsi.slice(0,60)+'…':r.deskripsi}</div>
+        </div>
+        <div class="item-sub">${fmtDate(r.tanggal)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   RENDER ALL
+   ============================================================ */
+function renderAll(){
+  renderDashboard();
+  renderVehicles();
+  populateVehicleSelect();
+  renderKmHistory();
+  renderServices();
+  renderReports();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('load', () => {
+  document.getElementById('nameInput').focus();
+});
+</script>
+</body>
+</html>
