@@ -6,108 +6,174 @@
 <title>Fleet Equipment Management — PTFI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
 
 <style>
 /* ============================================================
-   CONFIG — isi ini sebelum deploy
+   CONFIG — isi ini sebelum deploy?
    ============================================================ */
 :root{
-  --bg:#0B0F14; --surface:#141B22; --surface2:#1C242E; --border:#28323D;
-  --text:#EDF2F5; --muted:#8996A3; --amber:#2DD4BF; --amber-dim:#0F5C52;
-  --green:#34D399; --green-bg:#0F3327; --red:#F87171; --red-bg:#3A1E1E;
-  --blue:#60A5FA; --radius:14px;
-  --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --bg:#F4F7FB; --surface:#FFFFFF; --surface2:#F3F6FA; --border:#D6E8FB;
+  --text:#071424; --muted:#475569; --primary:#2563EB; --primary-dim:#1E40AF;
+  --green:#10B981; --green-bg:#ECFDF5; --red:#EF4444; --red-bg:#FFF1F2;
+  --accent:#2563EB; --radius:10px;
+  --font-display:'Merriweather',serif; --font-body:'Roboto',sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 html,body{height:100%;}
 body{
   background:var(--bg); color:var(--text); font-family:var(--font-body);
-  -webkit-font-smoothing:antialiased; padding-bottom:76px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; padding-bottom:140px; min-height:100vh;
+  font-size:15px; /* slightly larger base font for better readability */
 }
 button, input, select, textarea{font-family:inherit; color:inherit;}
-::-webkit-scrollbar{display:none;}
+/* show native scrollbar on desktop for accessibility */
+::-webkit-scrollbar{width:12px; height:12px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06); border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
 
 /* Top bar */
 .topbar{
-  position:sticky; top:0; z-index:20; background:rgba(18,22,28,0.92); backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:20; background:var(--surface); backdrop-filter:none;
+  border-bottom:1px solid var(--border); padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
 }
 .brand{display:flex; align-items:center; gap:9px;}
-.brand-mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(150deg, var(--amber), #17A398); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(45,212,191,0.35);}
-.brand-mark svg{width:16px; height:16px;}
-.brand-text{font-family:var(--font-display); font-weight:600; font-size:13.5px; letter-spacing:-0.2px; white-space:nowrap;}
-.brand-sub{font-size:10.5px; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase;}
+.brand-mark{display:flex; align-items:center; justify-content:flex-start; gap:12px; border-radius:8px; background:transparent; padding:6px 0;}
+.brand-mark svg{display:none}
+.brand-mark img{width:220px; height:auto; border-radius:6px; object-fit:contain}
+/* right-top image removed — keeping brand on left only */
+.brand-text{font-family:var(--font-display); font-weight:700; font-size:15px; color:var(--text);}
+.brand-sub{font-size:11px; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase;}
 .sync-pill{
-  display:flex; align-items:center; gap:6px; font-size:11px; padding:5px 10px; border-radius:20px;
-  background:var(--surface2); border:1px solid var(--border); color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; gap:8px; font-size:12px; padding:8px 12px; border-radius:12px;
+  background:var(--surface2); border:1px solid var(--border); color:var(--muted); cursor:pointer; box-shadow:0 2px 6px rgba(2,6,23,0.04);
 }
-.sync-dot{width:6px; height:6px; border-radius:50%; background:var(--muted);}
+.sync-dot{width:8px; height:8px; border-radius:50%; background:var(--muted);} 
 .sync-pill.ok .sync-dot{background:var(--green);}
 .sync-pill.err .sync-dot{background:var(--red);}
-.sync-pill.busy .sync-dot{background:var(--amber); animation:pulse 1s infinite;}
+.sync-pill.busy .sync-dot{background:var(--primary); animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-.screen{display:none; padding:18px 16px 24px; max-width:640px; margin:0 auto;}
+.screen{display:none; padding:20px 20px 140px; max-width:1100px; margin:0 auto; width:100%;}
 .screen.active{display:block;}
 
 .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
 .section-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.section-title{font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text);}
 .section-note{font-size:12px; color:var(--muted);}
 
 /* Login gate */
 .gate{
   display:flex; flex-direction:column; align-items:center; text-align:center;
-  padding:60px 24px; gap:14px;
+  padding:0; gap:0;
+  min-height:0;
 }
-.gate-icon{width:56px; height:56px; border-radius:14px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:6px;}
-.gate h1{font-family:var(--font-display); font-size:20px; font-weight:600;}
-.gate p{font-size:13.5px; color:var(--muted); line-height:1.6; max-width:320px;}
-.btn{
+.gate{position:relative; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:40px 18px;}
+.gate::before{content:''; position:fixed; inset:0; background-image:url('https://i.imgur.com/VEljvzI.png'); background-size:cover; background-position:center right; opacity:1; filter:saturate(0.9) brightness(1.02); z-index:0}
+.gate-overlay{position:relative; z-index:2; width:100%; max-width:600px; padding:28px 28px; background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.99)); border-radius:12px; box-shadow:0 18px 40px rgba(11,20,36,0.06); display:block;}
+.gate-left{width:100%; text-align:center}
+.gate-left .gate-icon{margin:0 auto 8px}
+.gate-left .gate-input{margin:0 auto}
+.gate-features{display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; justify-content:center}
+.gate-right{display:none}
+.gate-icon{width:72px; height:72px; border-radius:999px; background:linear-gradient(180deg,#fff,#f3f8ff); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:8px;}
+.gate h1{font-family:var(--font-display); font-size:28px; font-weight:700; margin-bottom:6px; color:var(--text)}
+.gate p{font-size:14px; color:var(--muted); line-height:1.5; max-width:460px; margin-bottom:14px}
+.gate-input{width:100%; display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); padding:10px 12px; border-radius:10px;}
+.gate-input input{border:0; outline:none; width:100%; font-size:14px;}
+.gate-cta{margin-top:14px; display:flex;}
+.gate-cta .btn{padding:12px 22px; border-radius:8px; font-size:15px}
+.gate-features{display:flex; gap:12px; margin-top:18px; flex-wrap:wrap}
+.feat{display:flex; gap:10px; align-items:center; background:var(--surface); padding:8px 12px; border-radius:10px; box-shadow:0 6px 18px rgba(11,20,36,0.03);}
+.feat svg{width:18px; height:18px}
+.brand-mark img{width:180px; height:auto;}
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   padding:12px 20px; border-radius:var(--radius); border:1px solid var(--border);
   background:var(--surface2); font-size:14px; font-weight:500; cursor:pointer; transition:transform .1s;
 }
 .btn:active{transform:scale(0.97);}
-.btn-primary{background:var(--amber); border-color:var(--amber); color:#04211C;}
+.btn-primary{background:var(--primary); border-color:var(--primary); color:#FFFFFF;}
 .btn-full{width:100%;}
 .btn-danger{background:var(--red-bg); border-color:#5A2C24; color:#F0968A;}
 
 /* Metric cards */
-.metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;}
+.metric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:22px;}
 .metric-card{background:linear-gradient(160deg, var(--surface2), var(--surface)); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:0 2px 10px rgba(0,0,0,0.18);}
-.metric-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px;}
-.metric-value{font-family:var(--font-mono); font-size:26px; font-weight:700;}
-.metric-value.amber{color:var(--amber);}
+.metric-card{display:flex; gap:12px; align-items:center; background:linear-gradient(160deg, var(--surface2), var(--surface)); border:1px solid rgba(7,18,36,0.04); border-radius:12px; padding:12px 16px; box-shadow:0 6px 18px rgba(11,20,36,0.04);}
+.metric-icon{width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(37,99,235,0.08), rgba(37,99,235,0.02)); color:var(--primary);}
+.metric-icon.icon-fleet{background:linear-gradient(180deg, rgba(37,99,235,0.12), rgba(37,99,235,0.03)); color:var(--primary);}
+.metric-icon.icon-tag{background:linear-gradient(180deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02)); color: #FF7A2D}
+.metric-icon.icon-doc{background:linear-gradient(180deg, rgba(234,179,8,0.08), rgba(234,179,8,0.02)); color:#D97706}
+.metric-icon.icon-report{background:linear-gradient(180deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02)); color:#EF4444}
+.metric-icon.icon-calendar{background:linear-gradient(180deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02)); color:#6366F1}
+.metric-label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; font-weight:700}
+.metric-value{font-family:var(--font-mono); font-size:28px; font-weight:800; color:var(--primary);}
+.metric-value.amber{color:var(--primary);}
 .metric-value.red{color:var(--red);}
 .metric-value.green{color:var(--green);}
+.metric-sub.small{font-size:12px; color:var(--muted); margin-top:6px}
+
+/* urgent badge animation */
+.badge-urgent{animation:badgePulse 1.6s ease-in-out infinite;}
+@keyframes badgePulse{0%{transform:translateY(0);}50%{transform:translateY(-2px);}100%{transform:translateY(0);}}
+
+/* responsive: stack metrics on small screens */
+@media (max-width:720px){
+  .metric-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;}
+  .metric-card{padding:10px; gap:10px;}
+  .metric-icon{width:44px; height:44px}
+  .metric-value{font-size:22px}
+  .item-card{padding:12px}
+}
 
 /* Odometer signature */
 .odometer{display:flex; gap:3px; font-family:var(--font-mono);}
 .odo-digit{
   background:#0A0D12; border:1px solid var(--border); border-radius:4px;
   width:26px; height:34px; display:flex; align-items:center; justify-content:center;
-  font-size:18px; font-weight:700; color:var(--amber);
+  font-size:18px; font-weight:700; color:var(--primary);
 }
 
 /* Cards / lists */
 .card-list{display:flex; flex-direction:column; gap:10px;}
+/* compact table for corporate view */
+.compact-table{width:100%; border-collapse:collapse; background:var(--surface); border:1px solid rgba(7,18,36,0.04); border-radius:10px; overflow:hidden}
+.compact-table th, .compact-table td{padding:12px 14px; text-align:left; border-bottom:1px solid rgba(7,18,36,0.04); font-size:13px}
+.compact-table th{background:var(--surface2); font-weight:700; color:var(--muted)}
+.compact-table tr:hover td{background:rgba(37,99,235,0.05)}
+.compact-table tr:nth-child(even) td{background:transparent}
+.compact-actions{display:flex; gap:8px; justify-content:flex-end}
+
+/* vehicle icon in dashboard */
+.veh-icon{display:inline-flex; width:34px; height:24px; align-items:center; justify-content:center; margin-right:8px;}
+.veh-icon svg{width:28px; height:20px;}
 .item-card{
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:14px; cursor:pointer; transition:border-color .15s, transform .1s; box-shadow:0 1px 8px rgba(0,0,0,0.14);
+  background:var(--surface); border:1px solid rgba(7,18,36,0.06); border-radius:14px;
+  padding:16px; cursor:pointer; transition:box-shadow .15s, transform .1s, border-color .12s; box-shadow:0 8px 22px rgba(11,20,36,0.06);
 }
-.item-card:active{border-color:var(--amber); transform:scale(0.99);}
+.item-card:active{border-color:var(--primary); transform:scale(0.99);}
 .item-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
-.item-title{font-weight:600; font-size:14.5px;}
-.item-sub{font-size:12px; color:var(--muted); margin-top:3px;}
+.item-title{font-weight:700; font-size:16px; color:var(--text);}
+.item-sub{font-size:14px; color:var(--muted); margin-top:6px;}
 .plate{
-  font-family:var(--font-mono); font-weight:700; font-size:13px; background:var(--surface2);
-  border:1px solid var(--border); padding:3px 8px; border-radius:5px; letter-spacing:0.5px;
+  font-family:var(--font-mono); font-weight:700; font-size:14px; background:var(--surface2);
+  border:1px solid rgba(7,18,36,0.04); padding:7px 12px; border-radius:7px; letter-spacing:0.4px; color:var(--text);
 }
-.badge{font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;}
-.badge-ok{background:var(--green-bg); color:var(--green);}
-.badge-warn{background:var(--red-bg); color:var(--red);}
-.badge-idle{background:var(--surface2); color:var(--muted);}
+.veh-thumb{width:64px; height:44px; object-fit:cover; border-radius:8px; border:1px solid rgba(7,18,36,0.04);} 
+
+/* badge type colors */
+.badge-tag{background:#EF4444; color:#fff}
+.badge-stnk{background:#F59E0B; color:#fff}
+.badge-pajak{background:#F97316; color:#fff}
+.badge-keur{background:#F43F5E; color:#fff}
+.badge-annual{background:#10B981; color:#04211C}
+.badge-tera{background:#3B82F6; color:#fff}
+.badge{font-size:11px; padding:5px 10px; border-radius:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;}
+.badge svg{width:14px; height:14px; vertical-align:middle; margin-right:6px; fill:currentColor; stroke:currentColor}
+.badge .badge-icon{display:inline-flex; align-items:center; justify-content:center}
+.badge-ok{background:var(--green); color:#04211C;} 
+.badge-warn{background:var(--red); color:#FFFFFF;} 
+.badge-idle{background:var(--surface2); color:var(--muted);} 
 
 .empty-state{text-align:center; padding:50px 20px; color:var(--muted);}
 .empty-state svg{width:36px; height:36px; margin-bottom:10px; opacity:0.5;}
@@ -115,12 +181,17 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 
 /* Forms */
 .field{margin-bottom:14px;}
-.field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:500;}
+.field label{display:block; font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:600;}
 .field input, .field select, .field textarea{
   width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:11px 12px; font-size:14px; outline:none;
+  padding:12px 14px; font-size:15px; outline:none;
 }
-.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--amber);}
+/* read-only value style for detail view */
+.readonly-value{
+  width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 14px; font-size:15px; color:var(--text);
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--primary);}
 .field textarea{resize:vertical; min-height:70px;}
 .field-row{display:flex; gap:10px;}
 .field-row .field{flex:1;}
@@ -131,10 +202,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238996A3' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
   background-repeat:no-repeat; background-position:right 6px center; background-size:14px;
 }
-.date-field-row select:focus{border-color:var(--amber);}
-.form-section-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--amber); margin:18px 0 8px; padding-top:12px; border-top:1px solid var(--border);}
+.date-field-row select:focus{border-color:var(--primary);}
+.form-section-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--primary); margin:18px 0 8px; padding-top:12px; border-top:1px solid var(--border);} 
 .form-section-label:first-of-type{margin-top:2px; padding-top:0; border-top:none;}
-.formpage-head{display:flex; align-items:center; gap:12px; margin-bottom:18px; position:sticky; top:-18px; background:var(--bg); padding:2px 0 10px; z-index:5;}
+.formpage-head{display:flex; align-items:center; gap:12px; margin-bottom:18px; position:sticky; top:-18px; background:transparent; padding:2px 0 10px; z-index:5;}
 
 /* Modal / detail sheet */
 .sheet-overlay{
@@ -143,23 +214,23 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 }
 .sheet-overlay.active{display:flex;}
 .sheet{
-  background:var(--bg); border-radius:16px 16px 0 0; width:100%; max-width:640px;
+  background:var(--surface); border-radius:16px 16px 0 0; width:100%; max-width:640px;
   max-height:88vh; overflow-y:auto; padding:18px 16px 28px; border-top:1px solid var(--border);
 }
 .sheet-handle{width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 16px;}
 .sheet-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
-.sheet-title{font-family:var(--font-display); font-weight:600; font-size:17px;}
+.sheet-title{font-family:var(--font-display); font-weight:600; font-size:18px;}
 .icon-btn{width:30px; height:30px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer;}
 
 /* Tabs (segmented) */
 .seg{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:3px; margin-bottom:16px;}
 .seg-btn{flex:1; text-align:center; padding:8px 4px; font-size:12.5px; font-weight:500; color:var(--muted); border-radius:7px; cursor:pointer;}
-.seg-btn.active{background:var(--amber); color:#04211C; font-weight:600;}
+.seg-btn.active{background:var(--primary); color:#FFFFFF; font-weight:600;}
 
 /* Bottom nav */
 .bottom-nav{
-  position:fixed; bottom:0; left:0; right:0; z-index:20; background:rgba(18,22,28,0.95); backdrop-filter:blur(10px);
-  border-top:1px solid var(--border); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  position:fixed; bottom:0; left:0; right:0; z-index:20; background:var(--surface); backdrop-filter:none;
+  border-top:1px solid var(--border); display:flex; padding:8px 6px calc(8px + env(safe-area-inset-bottom));
 }
 .nav-btn{
   flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 1px;
@@ -167,11 +238,11 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 }
 .nav-btn svg{width:19px; height:19px;}
 .nav-btn span{font-size:9.5px; font-weight:500; white-space:nowrap;}
-.nav-btn.active{color:var(--amber);}
+.nav-btn.active{color:var(--primary);}
 
 .fab{
   position:fixed; bottom:88px; right:18px; z-index:15; width:52px; height:52px; border-radius:50%;
-  background:var(--amber); color:#04211C; display:flex; align-items:center; justify-content:center;
+  background:var(--primary); color:#FFFFFF; display:flex; align-items:center; justify-content:center;
   border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
 .fab svg{width:24px; height:24px;}
@@ -193,31 +264,54 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="topbar">
   <div class="brand">
     <div class="brand-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#04211C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4M3 17a2 2 0 1 0 4 0M16 17a2 2 0 1 0 4 0"/></svg>
+      <img src="https://i.imgur.com/wY6pd66.png" alt="PTFI" class="brand-mark-img">
     </div>
     <div>
-      <div class="brand-text">Fleet Equipment Mgmt</div>
-      <div class="brand-sub">PTFI</div>
+      <div class="brand-text">Fleet Equipment Management</div>
+      <div class="brand-sub">PPLI PROJECT PT. FREEPORT INDONESIA</div>
     </div>
   </div>
-  <div class="sync-pill" id="syncPill" onclick="handleSyncClick()">
-    <div class="sync-dot"></div>
-    <span id="syncLabel">offline</span>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button id="compactToggle" class="btn" style="display:none; padding:8px 12px; font-size:13px;" onclick="toggleCompactView()">Compact view</button>
+    <select id="themeSelect" onchange="changeTheme(this.value)" style="padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text);">
+      <option value="corporate">Corporate</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <div class="sync-pill" id="syncPill" onclick="handleSyncClick()">
+      <div class="sync-dot"></div>
+      <span id="syncLabel">offline</span>
+    </div>
   </div>
 </div>
 
 <!-- LOGIN GATE -->
 <div class="screen active" id="screen-gate">
   <div class="gate">
-    <div class="gate-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#8A96A3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <div class="gate-overlay">
+      <div class="gate-left">
+        <div class="gate-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#06A77D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"></path><path d="M6 20v-2a6 6 0 0 1 12 0v2"></path></svg>
+        </div>
+        <h1>Selamat datang!</h1>
+        <p>Sebelum memulai, silakan masukkan nama Anda. Nama ini akan digunakan untuk mencatat setiap aktivitas pada sistem.</p>
+        <div class="gate-input" style="margin-top:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA6B2" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <input id="nameInput" placeholder="Masukkan nama Anda">
+        </div>
+        <div class="gate-cta"><button class="btn btn-primary" onclick="login()">Mulai →</button></div>
+        <div class="gate-features">
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#2B6CE8" stroke-width="1.6"><path d="M3 12h3l3 8 4-16 3 8h4"></path></svg><div style="font-size:13px; margin-left:6px;">Terintegrasi<br><span style="font-size:12px; color:var(--muted)">Tersimpan otomatis</span></div></div>
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#6B46C1" stroke-width="1.6"><path d="M3 12h18"></path><path d="M12 3v18"></path></svg><div style="font-size:13px; margin-left:6px;">Real-time<br><span style="font-size:12px; color:var(--muted)">Update instan</span></div></div>
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><path d="M9 7a4 4 0 1 0 8 0"></path></svg><div style="font-size:13px; margin-left:6px;">Kolaboratif<br><span style="font-size:12px; color:var(--muted)">Untuk seluruh tim</span></div></div>
+        </div>
+      </div>
+      <div class="gate-right" aria-hidden>
+        <!-- decorative background area (image comes from parent) -->
+      </div>
     </div>
-    <h1>Siapa nama Anda?</h1>
-    <p>Nama ini dipakai untuk menandai siapa yang mencatat data. Data tersimpan bersama lewat Google Sheet tim, tidak perlu login.</p>
-    <input id="nameInput" placeholder="Nama Anda" style="width:100%; max-width:280px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 12px; font-size:14px; text-align:center;">
-    <button class="btn btn-primary" onclick="login()" style="margin-top:4px;">Mulai</button>
-    <p id="gateError" style="color:var(--red); font-size:12px; display:none;"></p>
   </div>
+  <p id="gateError" style="color:var(--red); font-size:12px; display:none; margin-top:10px; text-align:center;"></p>
 </div>
 
 <!-- DASHBOARD -->
@@ -230,23 +324,57 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   </div>
   <div class="metric-grid">
     <div class="metric-card">
-      <div class="metric-label">Total kendaraan</div>
-      <div class="metric-value" id="mVehicles">0</div>
+      <div class="metric-icon icon-fleet" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18v10H3z"></path><circle cx="7.5" cy="16" r="1.8"></circle><circle cx="16.5" cy="16" r="1.8"></circle></svg>
+      </div>
+      <div>
+        <div class="metric-label">Total fleet</div>
+        <div class="metric-value" id="mVehicles">0</div>
+        <div class="metric-sub small" id="mVehiclesSub"></div>
+      </div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">PTFI TAG mendesak</div>
-      <div class="metric-value red" id="mTagUrgent">0</div>
+      <div class="metric-icon icon-tag" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 10v6a2 2 0 0 1-2 2h-6l-8-8 6-6 8 6z"></path><circle cx="8.5" cy="8.5" r="1.2"></circle></svg>
+      </div>
+      <div>
+        <div class="metric-label">PTFI TAGGING EXP</div>
+        <div class="metric-value red" id="mTagUrgent">0</div>
+        <div class="metric-sub small" id="mTagUrgentSub"></div>
+      </div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Dokumen lain mendesak</div>
-      <div class="metric-value amber" id="mOtherUrgent">0</div>
+      <div class="metric-icon icon-doc" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2h6v8h-8v-6z"></path><path d="M4 6h6v14H4z"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Dokumen lain Exp</div>
+        <div class="metric-value amber" id="mOtherUrgent">0</div>
+        <div class="metric-sub small" id="mOtherUrgentSub"></div>
+      </div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Laporan terbuka</div>
-      <div class="metric-value red" id="mOpenReports">0</div>
+      <div class="metric-icon icon-report" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v6"></path><path d="M6 12h12"></path><path d="M6 16h12"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Laporan terbuka</div>
+        <div class="metric-value red" id="mOpenReports">0</div>
+        <div class="metric-sub small" id="mOpenReportsSub"></div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon icon-calendar" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Rata-rata hari ke expired</div>
+        <div class="metric-value" id="mAvgExpiry">-</div>
+        <div class="metric-sub small" id="mAvgExpirySub">Rata-rata expiry</div>
+      </div>
     </div>
   </div>
-  <div class="section-head"><div class="section-title" style="font-size:14px;">Tagging &amp; dokumen paling mendesak</div></div>
+  <div class="section-head"><div class="section-title" style="font-size:14px;">Tagging &amp; dokumen Priority</div></div>
   <div class="card-list" id="dashDokumenList" style="margin-bottom:20px;"></div>
   <div class="section-head"><div class="section-title" style="font-size:14px;">Laporan abnormal terbaru</div></div>
   <div class="card-list" id="dashReportsList"></div>
@@ -262,7 +390,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   </div>
   <div class="seg" id="dokumenFilterSeg" style="overflow-x:auto;">
     <div class="seg-btn active" data-f="all" onclick="setDokumenFilter('all')">Semua</div>
-    <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">PTFI TAG</div>
+    <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">`</div>
     <div class="seg-btn" data-f="stnk" onclick="setDokumenFilter('stnk')">STNK</div>
     <div class="seg-btn" data-f="pajak" onclick="setDokumenFilter('pajak')">Pajak</div>
     <div class="seg-btn" data-f="keur" onclick="setDokumenFilter('keur')">KEUR</div>
@@ -276,7 +404,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-armada">
   <div class="section-head">
     <div class="section-title">Armada</div>
-    <button class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
+    <button id="addVehicleBtn" class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
   </div>
   <div class="card-list" id="vehicleList"></div>
 </div>
@@ -285,7 +413,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-peralatan">
   <div class="section-head">
     <div class="section-title">Peralatan</div>
-    <button class="btn" onclick="openPeralatanForm()">+ Alat</button>
+    <button id="addPeralatanBtn" class="btn" onclick="openPeralatanForm()">+ Alat</button>
   </div>
   <div class="card-list" id="peralatanList"></div>
 </div>
@@ -327,7 +455,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-servis">
   <div class="section-head">
     <div class="section-title">Riwayat servis</div>
-    <button class="btn" onclick="openServiceForm()">+ Servis</button>
+    <button id="addServiceBtn" class="btn" onclick="openServiceForm()">+ Servis</button>
   </div>
   <div class="card-list" id="serviceList"></div>
 </div>
@@ -336,7 +464,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-laporan">
   <div class="section-head">
     <div class="section-title">Laporan abnormal</div>
-    <button class="btn" onclick="openReportForm()">+ Laporan</button>
+    <button id="addReportBtn" class="btn" onclick="openReportForm()">+ Laporan</button>
   </div>
   <div class="seg" id="reportFilterSeg">
     <div class="seg-btn active" data-f="all" onclick="setReportFilter('all')">Semua</div>
@@ -410,13 +538,32 @@ const CONFIG = {
    ============================================================ */
 let DB = { vehicles: [], peralatan: [], kmLogs: [], services: [], reports: [] };
 let currentUserName = "Pengguna";
+// Admin config: list of lowercase names allowed to edit
+const ADMINS = ['admin','supervisor','ptfi'];
+let isAdmin = false;
 let reportFilter = "all";
 let dokumenFilter = "all";
 let activeScreen = "dashboard";
 
+// Reference date (YYYY-MM-DD) used when calculating days until expiry.
+// This is set when the page loads and updated after a successful sync,
+// so "hari ini" aligns with the data snapshot shown to the user.
+let appRefDateStr = todayStr();
+// UI state
+let compactView = false;
+
+function toggleCompactView(){
+  compactView = !compactView;
+  document.getElementById('compactToggle').textContent = compactView ? 'Expanded view' : 'Compact view';
+  if(activeScreen==='armada') renderVehicles();
+  else if(activeScreen==='peralatan') renderPeralatan();
+}
+
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function fmtDate(d){ return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function safeLower(x){ return x == null ? '' : String(x).toLowerCase(); }
 
 /* ============================================================
    DATE FIELD (Tgl / Bulan / Tahun) — dropdown 3 kolom dengan
@@ -476,6 +623,8 @@ function login(){
     return;
   }
   currentUserName = name;
+  // determine admin rights
+  isAdmin = ADMINS.includes(name.toLowerCase());
   afterLogin();
 }
 
@@ -485,6 +634,21 @@ function afterLogin(){
   document.getElementById('fab').classList.remove('hidden');
   goTo('dashboard');
   syncFromSheet();
+  updateAdminUI();
+}
+
+function updateAdminUI(){
+  // show/hide add buttons and fab for non-admins
+  const addVehicle = document.getElementById('addVehicleBtn');
+  const addPeralatan = document.getElementById('addPeralatanBtn');
+  const addService = document.getElementById('addServiceBtn');
+  const addReport = document.getElementById('addReportBtn');
+  const fab = document.getElementById('fab');
+  if(addVehicle) addVehicle.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(addPeralatan) addPeralatan.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(addService) addService.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(addReport) addReport.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(fab) fab.style.display = isAdmin ? 'flex' : 'none';
 }
 
 /* ============================================================
@@ -493,7 +657,13 @@ function afterLogin(){
 function setSyncStatus(state, label){
   const pill = document.getElementById('syncPill');
   pill.className = 'sync-pill ' + state;
+  // show label and, when synced, show the sync date in the title tooltip
   document.getElementById('syncLabel').textContent = label;
+  if(state === 'ok'){
+    pill.title = 'Tersinkron: ' + appRefDateStr;
+  } else {
+    pill.title = '';
+  }
 }
 
 async function syncFromSheet(){
@@ -513,7 +683,11 @@ async function syncFromSheet(){
       services: (parsed.services || []).map(normalizeRow),
       reports: (parsed.reports || []).map(normalizeRow)
     };
+    // apply any local image mappings so thumbnails appear without modifying backend
+    applyImageMappings();
     setSyncStatus('ok', 'tersinkron');
+    // update reference date so calculations reflect the day of this sync
+    appRefDateStr = todayStr();
     renderAll();
   }catch(e){
     setSyncStatus('err', 'gagal sinkron');
@@ -524,7 +698,50 @@ async function syncFromSheet(){
 function normalizeRow(row){
   if('km' in row) row.km = row.km === '' ? null : Number(row.km);
   if('biaya' in row) row.biaya = row.biaya === '' ? 0 : Number(row.biaya);
+  // Normalize common date fields from backend (may contain full ISO timestamps)
+  const dateFields = ['ptfiTagExpired','stnkExpired','pajakExpired','keurExpired','annualInspExpired','teraExpired','tanggal'];
+  dateFields.forEach(f => {
+    if(f in row && row[f]){
+      const d = new Date(row[f]);
+      if(!isNaN(d.getTime())){
+        row[f] = d.toISOString().slice(0,10); // YYYY-MM-DD
+      } else {
+        // if value is empty or unparseable, keep as-is (renderers handle empty)
+      }
+    }
+  });
   return row;
+}
+
+// Local image mapping: map identifier (name / plate / code) -> image URL
+const IMAGES_MAP = {
+  // example: maps equipment name or plate containing 'RO Truck 6033' to provided image
+  'ro truck 6033': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRikuRshHhk1hiZNKN2npkW-wAIUdH6A5llM4CV41-SCMmivLvp3tlPaQE8&s=10',
+  // user-provided Drive image for trucks 6037 and 6036
+  '6037': 'https://i.imgur.com/PcQJAcO.png',
+  '6036': 'https://i.imgur.com/PcQJAcO.png',
+  'dump truck': 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&q=60',
+  'double cabin': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=60',
+  'excavator': 'https://images.unsplash.com/photo-1504215680853-026ed2a45def?auto=format&fit=crop&w=800&q=60',
+  'timbangan': 'https://images.unsplash.com/photo-1581091870622-3e3ae0f94b0c?auto=format&fit=crop&w=800&q=60'
+};
+
+function applyImageMappings(){
+  if(!DB || !Array.isArray(DB.vehicles)) return;
+  Object.entries(IMAGES_MAP).forEach(([ident, url]) => setVehiclePhotoByIdentifier(ident, url));
+}
+
+function setVehiclePhotoByIdentifier(identifier, url){
+  if(!identifier) return;
+  const idLow = String(identifier).toLowerCase();
+  DB.vehicles.forEach(v=>{
+    const name = safeLower(v.equipmentName);
+    const plat = safeLower(v.plat);
+    const code = safeLower(v.equipmentCode);
+    if(name.includes(idLow) || plat.includes(idLow) || code.includes(idLow) || (v.id && v.id===identifier)){
+      v.photo = url;
+    }
+  });
 }
 
 async function saveToSheet(){
@@ -554,7 +771,11 @@ function goTo(screen){
   document.getElementById('screen-'+screen).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===screen));
   document.getElementById('fab').classList.remove('hidden');
+  // show compact toggle only for Armada and Peralatan screens
+  const ct = document.getElementById('compactToggle');
+  if(ct) ct.style.display = (screen==='armada' || screen==='peralatan') ? 'inline-flex' : 'none';
   renderAll();
+  updateAdminUI();
 }
 
 function handleFab(){
@@ -601,6 +822,7 @@ function closeSheet(){ document.getElementById('sheetOverlay').classList.remove(
    VEHICLES
    ============================================================ */
 function openVehicleForm(existing){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const v = existing || {};
   openFormPage(existing ? 'Ubah kendaraan' : 'Tambah kendaraan', `
     <div class="form-section-label">Identitas Equipment</div>
@@ -636,8 +858,8 @@ function openVehicleForm(existing){
       </select>
     </div>
 
-    <div class="form-section-label">PTFI TAG</div>
-    ${dateFieldHTML('fPtfiTag', 'PTFI TAG Expired Date', v.ptfiTagExpired)}
+    <div class="form-section-label">PTFI TAGGING</div>
+    ${dateFieldHTML('fPtfiTag', 'PTFI TAGGING Expired Date', v.ptfiTagExpired)}
 
     <div class="form-section-label">Monitoring STNK &amp; Pajak</div>
     <div class="field-row">
@@ -653,34 +875,102 @@ function openVehicleForm(existing){
     <div class="field"><label>Annual Inspection Number</label><input id="fAnnualNo" value="${v.annualInspNumber||''}" placeholder="cth. AI-2026-014"></div>
     ${dateFieldHTML('fAnnualExp', 'Annual Inspection Expired Date', v.annualInspExpired)}
 
+    <div class="form-section-label">Gambar</div>
+    <div class="field"><label>Image URL (opsional)</label><input id="fPhoto" value="${v.photo||v.image||v.img||''}" placeholder="https://..."></div>
+
     <button class="btn btn-primary btn-full" onclick="saveVehicle('${v.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deleteVehicle('${v.id}')">Hapus kendaraan</button>` : ''}
   `, 'armada');
 }
 
+function openVehicleDetail(v){
+  const val = x=> x||'-';
+  const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
+  const chip = primaryDocChip(v);
+  openFormPage('Detail kendaraan', `
+    <div class="form-section-label">Identitas Equipment</div>
+    <div class="field-row">
+      <div class="field"><label>Equipment Code</label><div class="readonly-value">${val(v.equipmentCode)}</div></div>
+      <div class="field"><label>Equipment Name</label><div class="readonly-value">${val(v.equipmentName)}</div></div>
+    </div>
+    <div class="field"><label>Contract Number</label><div class="readonly-value">${val(v.contractNumber)}</div></div>
+
+    <div class="form-section-label">Identification</div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><div class="readonly-value">${val(v.jenis)}</div></div>
+      <div class="field"><label>Brand</label><div class="readonly-value">${val(v.merk)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Model</label><div class="readonly-value">${val(v.model)}</div></div>
+      <div class="field"><label>Vehicle/Serial Number</label><div class="readonly-value">${val(v.serialNumber)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Owner</label><div class="readonly-value">${val(v.owner)}</div></div>
+      <div class="field"><label>Capacity</label><div class="readonly-value">${val(v.kapasitas)}</div></div>
+    </div>
+    <div class="field"><label>Plat nomor</label><div class="readonly-value">${val(v.plat)}</div></div>
+    <div class="field-row">
+      <div class="field"><label>Tahun</label><div class="readonly-value">${val(v.tahun)}</div></div>
+      <div class="field"><label>Lokasi/area</label><div class="readonly-value">${val(v.lokasi)}</div></div>
+    </div>
+    <div class="field"><label>Status</label><div class="readonly-value">${val(v.status)}</div></div>
+
+    <div class="form-section-label">PTFI TAGGING</div>
+    <div class="field"><div class="readonly-value">${val(v.ptfiTagExpired)} ${v.ptfiTagExpired? expChip('PTFI', v.ptfiTagExpired):''}</div></div>
+
+    <div class="form-section-label">Monitoring STNK & Pajak</div>
+    <div class="field-row">
+      <div class="field"><label>STNK Expired</label><div class="readonly-value">${val(v.stnkExpired)} ${v.stnkExpired? expChip('STNK', v.stnkExpired):''}</div></div>
+      <div class="field"><label>PAJAK Expired</label><div class="readonly-value">${val(v.pajakExpired)} ${v.pajakExpired? expChip('PAJAK', v.pajakExpired):''}</div></div>
+    </div>
+
+    <div class="form-section-label">KEUR</div>
+    <div class="field"><label>Inspection Number</label><div class="readonly-value">${val(v.inspectionNumber)}</div></div>
+    <div class="field"><label>KEUR Expired</label><div class="readonly-value">${val(v.keurExpired)} ${v.keurExpired? expChip('KEUR', v.keurExpired):''}</div></div>
+
+    <div class="form-section-label">PTFI Annual Inspection</div>
+    <div class="field"><label>Annual Inspection Number</label><div class="readonly-value">${val(v.annualInspNumber)}</div></div>
+    <div class="field"><label>Annual Inspection Expired</label><div class="readonly-value">${val(v.annualInspExpired)}</div></div>
+
+    <div class="form-section-label">Lainnya</div>
+    <div class="field"><label>Last KM</label><div class="readonly-value">${lastKm? (lastKm.km.toLocaleString('id-ID')+' km') : '-'}</div></div>
+    ${chip?`<div style="margin-top:10px;">${chip}</div>`:''}
+  `, 'armada');
+}
+
+function openVehicleAction(id){
+  const v = DB.vehicles.find(x=>x.id===id);
+  if(!v) return;
+  if(isAdmin) openVehicleForm(v); else openVehicleDetail(v);
+}
+
 function saveVehicle(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const plat = document.getElementById('fPlat').value.trim();
-  if(!plat){ showToast('Plat nomor wajib diisi', 'err'); return; }
+  const nama = document.getElementById('fEquipName').value.trim();
+  if(!nama){ showToast('Nama kendaraan wajib diisi', 'err'); return; }
   const data = {
-    plat, jenis: document.getElementById('fJenis').value.trim(),
-    merk: document.getElementById('fMerk').value.trim(),
-    tahun: document.getElementById('fTahun').value.trim(),
-    lokasi: document.getElementById('fLokasi').value.trim(),
-    status: document.getElementById('fStatus').value,
     equipmentCode: document.getElementById('fEquipCode').value.trim(),
-    equipmentName: document.getElementById('fEquipName').value.trim(),
+    equipmentName: nama,
     contractNumber: document.getElementById('fContract').value.trim(),
+    jenis: document.getElementById('fJenis').value.trim(),
+    merk: document.getElementById('fMerk').value.trim(),
     model: document.getElementById('fModel').value.trim(),
     serialNumber: document.getElementById('fSerial').value.trim(),
     owner: document.getElementById('fOwner').value.trim(),
     kapasitas: document.getElementById('fKapasitas').value.trim(),
+    plat: plat,
+    tahun: document.getElementById('fTahun').value.trim(),
+    lokasi: document.getElementById('fLokasi').value.trim(),
+    status: document.getElementById('fStatus').value,
     ptfiTagExpired: getDateFieldValue('fPtfiTag'),
     stnkExpired: getDateFieldValue('fStnk'),
     pajakExpired: getDateFieldValue('fPajak'),
-    inspectionNumber: document.getElementById('fInspeksi').value.trim(),
     keurExpired: getDateFieldValue('fKeur'),
+    inspectionNumber: document.getElementById('fInspeksi').value.trim(),
     annualInspNumber: document.getElementById('fAnnualNo').value.trim(),
-    annualInspExpired: getDateFieldValue('fAnnualExp')
+    annualInspExpired: getDateFieldValue('fAnnualExp'),
+    photo: document.getElementById('fPhoto') ? document.getElementById('fPhoto').value.trim() : ''
   };
   if(id){
     const v = DB.vehicles.find(x=>x.id===id);
@@ -693,17 +983,12 @@ function saveVehicle(id){
   goTo('armada');
 }
 
-function deleteVehicle(id){
-  DB.vehicles = DB.vehicles.filter(v=>v.id!==id);
-  saveToSheet();
-  goTo('armada');
-}
-
 /* ============================================================
    PERALATAN — alat non-kendaraan (timbangan, portable jack, dll)
    yang perlu tera / uji riksa berkala
    ============================================================ */
 function openPeralatanForm(existing){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const p = existing || {};
   openFormPage(existing ? 'Ubah alat' : 'Tambah alat', `
     <div class="form-section-label">Identitas Alat</div>
@@ -740,7 +1025,44 @@ function openPeralatanForm(existing){
   `, 'peralatan');
 }
 
+function openPeralatanDetail(p){
+  const val = x=> x||'-';
+  const teraDays = daysUntil(p.teraExpired);
+  const teraText = teraDays===null?'-':(teraDays<=0?`Lewat ${Math.abs(teraDays)} hari`:`${teraDays} hari lagi`);
+  openFormPage('Detail alat', `
+    <div class="form-section-label">Identitas Alat</div>
+    <div class="field-row">
+      <div class="field"><label>Kode Alat</label><div class="readonly-value">${val(p.kodeAlat)}</div></div>
+      <div class="field"><label>Nama Alat</label><div class="readonly-value">${val(p.namaAlat)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Jenis</label><div class="readonly-value">${val(p.jenisAlat)}</div></div>
+      <div class="field"><label>Merk</label><div class="readonly-value">${val(p.merk)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Model</label><div class="readonly-value">${val(p.model)}</div></div>
+      <div class="field"><label>Nomor Seri</label><div class="readonly-value">${val(p.noSeri)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Kapasitas</label><div class="readonly-value">${val(p.kapasitas)}</div></div>
+      <div class="field"><label>Lokasi/area</label><div class="readonly-value">${val(p.lokasi)}</div></div>
+    </div>
+    <div class="field"><label>Status</label><div class="readonly-value">${val(p.status)}</div></div>
+
+    <div class="form-section-label">Tera / Uji Riksa</div>
+    <div class="field"><label>Nomor Sertifikat</label><div class="readonly-value">${val(p.teraNumber)}</div></div>
+    <div class="field"><label>Tanggal Expired</label><div class="readonly-value">${val(p.teraExpired)} ${p.teraExpired? expChip('Tera', p.teraExpired):''}</div></div>
+  `, 'peralatan');
+}
+
+function openPeralatanAction(id){
+  const p = DB.peralatan.find(x=>x.id===id);
+  if(!p) return;
+  if(isAdmin) openPeralatanForm(p); else openPeralatanDetail(p);
+}
+
 function savePeralatan(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const nama = document.getElementById('pNama').value.trim();
   if(!nama){ showToast('Nama alat wajib diisi', 'err'); return; }
   const data = {
@@ -768,9 +1090,44 @@ function savePeralatan(id){
 }
 
 function deletePeralatan(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">Konfirmasi hapus</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <p>Anda yakin ingin menghapus alat ini? Tindakan ini tidak dapat dibatalkan.</p>
+    <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn" onclick="closeSheet()">Tidak</button><button class="btn btn-danger" onclick="performDeletePeralatan('${id}')">Ya, Hapus</button></div>
+  `);
+}
+
+function performDeletePeralatan(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
   DB.peralatan = DB.peralatan.filter(p=>p.id!==id);
-  saveToSheet();
-  goTo('peralatan');
+  closeSheet(); saveToSheet(); showToast('Alat dihapus', 'ok'); goTo('peralatan');
+}
+
+// Delete vehicle with confirmation and cascade removal of related records
+function deleteVehicle(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  openSheet(`
+    <div class="sheet-head">
+      <div class="sheet-title">Konfirmasi hapus</div>
+      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <p>Anda yakin ingin menghapus kendaraan ini beserta semua catatan terkait (KM, servis, laporan)?</p>
+    <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn" onclick="closeSheet()">Tidak</button><button class="btn btn-danger" onclick="performDeleteVehicle('${id}')">Ya, Hapus</button></div>
+  `);
+}
+
+function performDeleteVehicle(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  DB.vehicles = DB.vehicles.filter(v=>v.id!==id);
+  // remove related logs
+  DB.kmLogs = DB.kmLogs.filter(k=>k.vehicleId!==id);
+  DB.services = DB.services.filter(s=>s.vehicleId!==id);
+  DB.reports = DB.reports.filter(r=>r.vehicleId!==id);
+  closeSheet(); saveToSheet(); showToast('Kendaraan dan catatan terkait dihapus', 'ok'); goTo('armada');
 }
 
 function renderPeralatan(){
@@ -783,31 +1140,54 @@ function renderPeralatan(){
     </div>`;
     return;
   }
-  list.innerHTML = DB.peralatan.map(p=>{
-    const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
-    const teraDays = daysUntil(p.teraExpired);
-    let teraChip = '';
-    if(teraDays !== null){
-      const cls = teraDays<=0 ? 'badge-warn' : teraDays<=30 ? 'badge-warn' : teraDays<=60 ? 'badge-idle' : 'badge-ok';
-      const text = teraDays<=0 ? `Tera lewat ${Math.abs(teraDays)} hari` : `Tera ${teraDays} hari lagi`;
-      teraChip = `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
-    }
-    const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
-    return `<div class="item-card" onclick='openPeralatanForm(${JSON.stringify(p).replace(/'/g,"&apos;")})'>
-      <div class="item-row">
-        <div>
-          <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--amber); margin-bottom:4px;">${p.namaAlat}</div>
-          <div class="item-row" style="gap:8px;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
-          <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+  if(compactView){
+    list.innerHTML = `
+      <table class="compact-table">
+        <thead><tr><th>Kode / Nama Alat</th><th>Status</th><th>Tera</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
+        <tbody>
+          ${DB.peralatan.map(p=>{
+            const teraDays = daysUntil(p.teraExpired);
+            const teraText = teraDays===null?'-':(teraDays<=0?`Lewat ${Math.abs(teraDays)} hari`:`${teraDays} hari`);
+            const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
+            const name = p.namaAlat || '-';
+            const code = p.kodeAlat ? (' · ' + p.kodeAlat) : '';
+            return `<tr onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
+              <td><strong>${name}</strong>${code}</td>
+              <td><span class="badge ${badge}" style="text-transform:none;">${p.status}</span></td>
+              <td>${teraText}</td>
+              <td>${p.lokasi||''}${p.noSeri? ' · ' + p.noSeri : ''}</td>
+              <td class="compact-actions">${isAdmin?`<button class="btn" onclick="event.stopPropagation(); openPeralatanForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn" onclick="event.stopPropagation(); deletePeralatan('${p.id}');">Hapus</button>`:''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  } else {
+    list.innerHTML = DB.peralatan.map(p=>{
+      const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
+      const teraDays = daysUntil(p.teraExpired);
+      let teraChip = '';
+      if(teraDays !== null){
+        const cls = teraDays<=0 ? 'badge-warn' : teraDays<=30 ? 'badge-warn' : teraDays<=60 ? 'badge-idle' : 'badge-ok';
+        const text = teraDays<=0 ? `Tera lewat ${Math.abs(teraDays)} hari` : `Tera ${teraDays} hari lagi`;
+        teraChip = `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+      }
+      const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
+      return `<div class="item-card" onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
+        <div class="item-row">
+          <div>
+            <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat}</div>
+            <div class="item-row" style="gap:8px;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
+            <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="item-sub">${p.lokasi||''}</div>
+            <div class="item-sub">${p.noSeri||''}</div>
+          </div>
         </div>
-        <div style="text-align:right;">
-          <div class="item-sub">${p.lokasi||''}</div>
-          <div class="item-sub">${p.noSeri||''}</div>
-        </div>
-      </div>
-      ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
-    </div>`;
-  }).join('');
+        ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
 }
 
 /* EXP days helper: null date -> null, else integer days remaining (negative = expired) */
@@ -815,8 +1195,9 @@ function daysUntil(dateStr){
   if(!dateStr) return null;
   const d = new Date(dateStr + 'T00:00:00');
   if(isNaN(d.getTime())) return null;
-  const today = new Date(todayStr() + 'T00:00:00');
-  return Math.round((d - today) / 86400000);
+  const today = new Date(appRefDateStr + 'T00:00:00');
+  // use floor so that partial-day differences count as passed days when appropriate
+  return Math.floor((d - today) / 86400000);
 }
 
 function expChip(label, dateStr){
@@ -827,33 +1208,84 @@ function expChip(label, dateStr){
   else if(days <= 30) cls = 'badge-warn';
   else if(days <= 60) cls = 'badge-idle';
   const text = days <= 0 ? `${label} lewat ${Math.abs(days)}h` : `${label} ${days}h lagi`;
-  return `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+  return `<span class="badge ${cls}" style="text-transform:none;">${badgeIconHTML('doc')} ${text}</span>`;
 }
 
-/* PTFI TAG adalah indikator utama. Kalau TAG dalam zona waspada
-   (sudah lewat atau ≤60 hari), itu yang ditampilkan. Kalau TAG
-   masih aman, baru tampilkan yang paling mendesak di antara
-   STNK / Pajak / KEUR / Annual Inspection. Kalau tidak ada yang
-   mendesak sama sekali, tampilkan status TAG apa adanya (sebagai
-   info utama default). */
+/* PTFI TAGGING adalah indikator utama. Kalau TAG dalam zona waspada
+  (sudah lewat atau ≤60 hari), itu yang ditampilkan. Kalau TAG
+  masih aman, baru tampilkan yang paling mendesak di antara
+  STNK / Pajak / KEUR / Annual Inspection. Kalau tidak ada yang
+  mendesak sama sekali, tampilkan status TAG apa adanya (sebagai
+  info utama default). */
 const ALERT_WINDOW = 60;
 function getPrimaryDoc(v){
   const tagDays = daysUntil(v.ptfiTagExpired);
   const others = [
-    { label: 'STNK', date: v.stnkExpired, days: daysUntil(v.stnkExpired) },
-    { label: 'Pajak', date: v.pajakExpired, days: daysUntil(v.pajakExpired) },
-    { label: 'KEUR', date: v.keurExpired, days: daysUntil(v.keurExpired) },
-    { label: 'Annual Inspection', date: v.annualInspExpired, days: daysUntil(v.annualInspExpired) }
+    { key: 'stnk', label: 'STNK', date: v.stnkExpired, days: daysUntil(v.stnkExpired) },
+    { key: 'pajak', label: 'Pajak', date: v.pajakExpired, days: daysUntil(v.pajakExpired) },
+    { key: 'keur', label: 'KEUR', date: v.keurExpired, days: daysUntil(v.keurExpired) },
+    { key: 'annual', label: 'Annual Inspection', date: v.annualInspExpired, days: daysUntil(v.annualInspExpired) }
   ].filter(o => o.days !== null);
 
   if(tagDays !== null && tagDays <= ALERT_WINDOW){
-    return { label: 'PTFI TAG', date: v.ptfiTagExpired, days: tagDays };
+    return { key: 'tag', label: 'PTFI TAGGING', date: v.ptfiTagExpired, days: tagDays };
   }
   const urgentOthers = others.filter(o => o.days <= ALERT_WINDOW).sort((a,b)=>a.days-b.days);
   if(urgentOthers.length) return urgentOthers[0];
-  if(tagDays !== null) return { label: 'PTFI TAG', date: v.ptfiTagExpired, days: tagDays };
+  if(tagDays !== null) return { key: 'tag', label: 'PTFI TAGGING', date: v.ptfiTagExpired, days: tagDays };
   const rest = others.sort((a,b)=>a.days-b.days);
   return rest.length ? rest[0] : null;
+}
+
+function vehicleIcon(v){
+  if(!v) return '';
+  // if vehicle has a photo, show thumbnail
+  const img = v.photo || v.image || v.img;
+  if(img){
+    return `<img class="veh-thumb" src="${img}" alt="${(v.equipmentName||'vehicle')}">`;
+  }
+  const name = safeLower(v.equipmentName);
+  const jenis = safeLower(v.jenis);
+  const code = safeLower(v.equipmentCode);
+  // heuristics: if contains 'truck' -> truck icon; if contains 'lv' or 'pickup' or 'double' -> car
+  if(name.includes('truck') || jenis.includes('truck') || code.includes('truck')){
+    return `<span class="veh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="14" height="9" rx="1"/><path d="M15 14h3l3 3v1"/><circle cx="6.5" cy="17.5" r="1.5"/><circle cx="17.5" cy="17.5" r="1.5"/></svg></span>`;
+  }
+  if(name.includes('lv') || jenis.includes('lv') || code.includes('lv') || name.includes('pickup') || jenis.includes('pickup') || name.includes('double')){
+    return `<span class="veh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="18" height="8" rx="2"/><path d="M4 14v3a1 1 0 0 0 1 1h1.5"/><path d="M20 14v3a1 1 0 0 1-1 1h-1.5"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg></span>`;
+  }
+  // fallback generic vehicle icon
+  return `<span class="veh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="8" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></span>`;
+}
+
+function badgeIconHTML(key){
+  if(!key) return '';
+  key = String(key).toLowerCase();
+  switch(key){
+    case 'tag':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 10v6a2 2 0 0 1-2 2h-6l-8-8 6-6 8 6z"></path><circle cx="8.5" cy="8.5" r="1.2"></circle></svg>`;
+    case 'stnk':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"></path><path d="M4 11h16"></path></svg>`;
+    case 'pajak':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 1v22"></path><path d="M17 5H7a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H7"></path></svg>`;
+    case 'keur':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 4v6a8 8 0 1 1-14 0V6l7-4z"></path><path d="M9.5 12.5l2 2 4-4"></path></svg>`;
+    case 'annual':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>`;
+    case 'tera':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21h16M6 7h12M7 7v14"></path><path d="M17 7v10"></path></svg>`;
+    case 'aktif':
+    case 'ok':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6L9 17l-5-5"></path></svg>`;
+    case 'rusak':
+    case 'warn':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18.14A2 2 0 0 0 3.6 21h16.8a2 2 0 0 0 1.78-2.86L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>`;
+    case 'open':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>`;
+    case 'doc':
+    default:
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>`;
+  }
 }
 
 function primaryDocChip(v){
@@ -863,8 +1295,9 @@ function primaryDocChip(v){
   if(doc.days <= 0) cls = 'badge-warn';
   else if(doc.days <= 30) cls = 'badge-warn';
   else if(doc.days <= 60) cls = 'badge-idle';
+  const typeCls = doc.key ? ' badge-' + doc.key : '';
   const text = doc.days <= 0 ? `${doc.label} lewat ${Math.abs(doc.days)} hari` : `${doc.label} ${doc.days} hari lagi`;
-  return `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+  return `<span class="badge ${cls}${typeCls}" style="text-transform:none;">${badgeIconHTML(doc.key)} ${text}</span>`;
 }
 
 function renderVehicles(){
@@ -876,40 +1309,71 @@ function renderVehicles(){
     </div>`;
     return;
   }
-  list.innerHTML = DB.vehicles.map(v=>{
-    const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
-    const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
-    const chip = primaryDocChip(v);
-    const subLine = [v.merk, v.model, v.jenis, v.tahun].filter(Boolean).join(' · ');
-    return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(v).replace(/'/g,"&apos;")})'>
-      <div class="item-row">
-        <div>
-          ${v.equipmentName ? `<div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--amber); margin-bottom:4px;">${v.equipmentName}</div>` : ''}
-          <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}">${v.status}</span></div>
-          <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
-          ${v.equipmentCode?`<div class="item-sub">Kode: ${v.equipmentCode}${v.contractNumber?' · Kontrak: '+v.contractNumber:''}</div>`:''}
+  if(compactView){
+    // render table
+    list.innerHTML = `
+      <table class="compact-table">
+        <thead><tr><th>Plat</th><th>Nama / Kode</th><th>Status</th><th>Primary Doc</th><th>Days</th><th style="width:160px">Aksi</th></tr></thead>
+        <tbody>
+          ${DB.vehicles.map(v=>{
+            const doc = getPrimaryDoc(v);
+            const days = doc ? doc.days : '';
+            const docLabel = doc ? doc.label : '-';
+            const statusText = v.status || '-';
+            const name = v.equipmentName || (v.merk? v.merk + ' ' + (v.model||'') : '-');
+            const code = v.equipmentCode ? (' · ' + v.equipmentCode) : '';
+            return `<tr onclick='openVehicleAction("${v.id}")' style="cursor:pointer;">
+              <td><div style="display:flex; align-items:center; gap:8px;"><div style="width:56px; flex-shrink:0;">${vehicleIcon(v)}</div><strong>${v.plat}</strong></div></td>
+              <td>${name}${code}</td>
+              <td><span class="badge ${v.status==='aktif'?'badge-ok':v.status==='perbaikan'?'badge-warn':'badge-idle'}" style="text-transform:none;">${statusText}</span></td>
+              <td>${docLabel}</td>
+              <td style="font-weight:700;">${typeof days==='number'? (days<=0? 'Lewat '+Math.abs(days) : days+' hari') : '-'}</td>
+              <td class="compact-actions">${isAdmin?`<button class="btn" onclick="event.stopPropagation(); openVehicleForm(${JSON.stringify(v).replace(/'/g,"&apos;")});">Ubah</button><button class="btn" onclick="event.stopPropagation(); deleteVehicle('${v.id}');">Hapus</button>`:''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  } else {
+    list.innerHTML = DB.vehicles.map(v=>{
+      const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
+      const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
+      const chip = primaryDocChip(v);
+      const subLine = [v.merk, v.model, v.jenis, v.tahun].filter(Boolean).join(' · ');
+      return `<div class="item-card" onclick='openVehicleAction("${v.id}")' style="cursor:pointer;">
+        <div class="item-row">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div>${vehicleIcon(v)}</div>
+            <div>
+              ${v.equipmentName ? `<div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${v.equipmentName}</div>` : ''}
+              <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}">${v.status}</span></div>
+              <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+              ${v.equipmentCode?`<div class="item-sub">Kode: ${v.equipmentCode}${v.contractNumber?' · Kontrak: '+v.contractNumber:''}</div>`:''}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="item-sub">${v.lokasi||''}</div>
+            <div class="item-sub" style="font-family:var(--font-mono); color:var(--text); margin-top:2px;">${lastKm ? lastKm.km.toLocaleString('id-ID')+' km' : 'belum ada KM'}</div>
+          </div>
         </div>
-        <div style="text-align:right;">
-          <div class="item-sub">${v.lokasi||''}</div>
-          <div class="item-sub" style="font-family:var(--font-mono); color:var(--text); margin-top:2px;">${lastKm ? lastKm.km.toLocaleString('id-ID')+' km' : 'belum ada KM'}</div>
-        </div>
-      </div>
-      ${chip ? `<div style="margin-top:10px;">${chip}</div>` : ''}
-    </div>`;
-  }).join('');
+        ${chip ? `<div style="margin-top:10px;">${chip}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
 }
 
 function populateVehicleSelect(){
   const sel = document.getElementById('kmVehicleSelect');
   const current = sel.value;
-  sel.innerHTML = DB.vehicles.map(v=>`<option value="${v.id}">${v.plat} — ${v.jenis||v.merk||''}</option>`).join('');
+  sel.innerHTML = DB.vehicles.map(v=>`<option value="${v.id}">${v.plat} — ${v.equipmentName||v.jenis||v.merk||''}</option>`).join('');
   if(current) sel.value = current;
+  renderKmHistory();
 }
 
 /* ============================================================
    KM LOGS
    ============================================================ */
 function submitKm(){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const vehicleId = document.getElementById('kmVehicleSelect').value;
   const km = parseInt(document.getElementById('kmInput').value, 10);
   if(!vehicleId){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
@@ -929,6 +1393,10 @@ function renderKmHistory(){
   const vehicleId = document.getElementById('kmVehicleSelect').value;
   const list = document.getElementById('kmHistoryList');
   const logs = DB.kmLogs.filter(k=>k.vehicleId===vehicleId).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const v = DB.vehicles.find(x=>x.id===vehicleId);
+  // update KM screen title to include equipment name like reports
+  const kmTitleEl = document.querySelector('#screen-km .section-title');
+  if(kmTitleEl){ kmTitleEl.textContent = v ? `Catat KM — ${v.equipmentName} (${v.plat||''})` : 'Catat KM'; }
   if(!logs.length){
     list.innerHTML = `<div class="empty-state"><p>Belum ada catatan KM untuk kendaraan ini.</p></div>`;
     return;
@@ -937,7 +1405,7 @@ function renderKmHistory(){
     <div class="item-card" style="cursor:default;">
       <div class="item-row">
         <div>
-          <div class="item-title" style="font-family:var(--font-mono);">${k.km.toLocaleString('id-ID')} km</div>
+          <div class="item-title" style="font-family:var(--font-mono);">${v? (v.equipmentName + ' · '): ''}${k.km.toLocaleString('id-ID')} km</div>
           <div class="item-sub">${k.catatan || '—'}</div>
         </div>
         <div style="text-align:right;">
@@ -952,6 +1420,7 @@ function renderKmHistory(){
    SERVICE HISTORY
    ============================================================ */
 function openServiceForm(){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
   openSheet(`
     <div class="sheet-head">
@@ -959,7 +1428,7 @@ function openServiceForm(){
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
     <div class="field"><label>Kendaraan</label>
-      <select id="sVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat}</option>`).join('')}</select>
+      <select id="sVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat} — ${v.equipmentName||''}</option>`).join('')}</select>
     </div>
     <div class="field-row">
       <div class="field"><label>Tanggal</label><input id="sTanggal" type="date" value="${todayStr()}"></div>
@@ -974,9 +1443,20 @@ function openServiceForm(){
     </div>
     <button class="btn btn-primary btn-full" onclick="saveService()">Simpan servis</button>
   `);
+
+  // update sheet title to include selected equipment name and attach listener
+  const setServiceSheetTitle = ()=>{
+    const sel = document.getElementById('sVehicle'); if(!sel) return;
+    const vv = DB.vehicles.find(x=>x.id===sel.value);
+    const titleEl = document.querySelector('#sheetContent .sheet-title');
+    if(titleEl) titleEl.textContent = vv ? `Catat servis — ${vv.equipmentName} (${vv.plat||''})` : 'Catat servis';
+  };
+  setServiceSheetTitle();
+  const selEl = document.getElementById('sVehicle'); if(selEl) selEl.addEventListener('change', setServiceSheetTitle);
 }
 
 function saveService(){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const vehicleId = document.getElementById('sVehicle').value;
   const jenis = document.getElementById('sJenis').value.trim();
   if(!jenis){ showToast('Isi jenis servis', 'err'); return; }
@@ -1004,10 +1484,13 @@ function renderServices(){
     const v = DB.vehicles.find(x=>x.id===s.vehicleId);
     return `<div class="item-card" style="cursor:default;">
       <div class="item-row">
-        <div>
-          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="item-title">${s.jenis}</span></div>
-          <div class="item-sub">${s.item || '—'}</div>
-          <div class="item-sub">${s.bengkel||''}${s.km?' · '+s.km.toLocaleString('id-ID')+' km':''}</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          ${vehicleIcon(v)}
+          <div>
+            <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="item-title">${v? (v.equipmentName + ' · ' + s.jenis) : s.jenis}</span></div>
+            <div class="item-sub">${s.item || '—'}</div>
+            <div class="item-sub">${s.bengkel||''}${s.km?' · '+s.km.toLocaleString('id-ID')+' km':''}</div>
+          </div>
         </div>
         <div style="text-align:right;">
           <div class="item-sub">${fmtDate(s.tanggal)}</div>
@@ -1022,6 +1505,7 @@ function renderServices(){
    ABNORMAL REPORTS
    ============================================================ */
 function openReportForm(){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
   openSheet(`
     <div class="sheet-head">
@@ -1045,6 +1529,7 @@ function openReportForm(){
 }
 
 function saveReport(){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const desk = document.getElementById('rDesk').value.trim();
   if(!desk){ showToast('Isi deskripsi masalah', 'err'); return; }
   DB.reports.push({
@@ -1058,6 +1543,7 @@ function saveReport(){
 }
 
 function toggleReportStatus(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengubah status laporan', 'err'); return; }
   const r = DB.reports.find(x=>x.id===id);
   r.status = r.status==='open' ? 'selesai' : 'open';
   closeSheet(); renderAll(); saveToSheet();
@@ -1068,7 +1554,7 @@ function openReportDetail(id){
   const v = DB.vehicles.find(x=>x.id===r.vehicleId);
   openSheet(`
     <div class="sheet-head">
-      <div class="sheet-title">${v?v.plat:'?'}</div>
+      <div class="sheet-title">${v? (v.equipmentName + ' — ' + (v.plat||'')) : '?'}</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
     <p style="font-size:13px; color:var(--muted); margin-bottom:4px;">Dilaporkan ${fmtDate(r.tanggal)} oleh ${r.dilaporkanOleh}</p>
@@ -1099,9 +1585,12 @@ function renderReports(){
     const badge = r.status==='open' ? 'badge-warn' : 'badge-ok';
     return `<div class="item-card" onclick="openReportDetail('${r.id}')">
       <div class="item-row">
-        <div>
-          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="badge ${badge}">${r.status}</span></div>
-          <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>70?r.deskripsi.slice(0,70)+'…':r.deskripsi}</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          ${vehicleIcon(v)}
+          <div>
+            <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v?v.plat:'?'}</span><span class="item-title">${v? v.equipmentName : ''}</span><span class="badge ${badge}">${r.status}</span></div>
+            <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>70?r.deskripsi.slice(0,70)+'…':r.deskripsi}</div>
+          </div>
         </div>
         <div style="text-align:right;">
           <div class="item-sub">${fmtDate(r.tanggal)}</div>
@@ -1121,26 +1610,58 @@ function renderDashboard(){
   document.getElementById('mOpenReports').textContent = DB.reports.filter(r=>r.status==='open').length;
 
   const primaries = DB.vehicles.map(v=>({ v, doc: getPrimaryDoc(v) })).filter(x=>x.doc);
-  const tagUrgent = primaries.filter(x=>x.doc.label==='PTFI TAG' && x.doc.days<=ALERT_WINDOW).length;
-  const otherUrgent = primaries.filter(x=>x.doc.label!=='PTFI TAG' && x.doc.days<=ALERT_WINDOW).length;
+  const tagUrgent = primaries.filter(x=>x.doc.label==='PTFI TAGGING' && x.doc.days<=ALERT_WINDOW).length;
+  const otherUrgent = primaries.filter(x=>x.doc.label!=='PTFI TAGGING' && x.doc.days<=ALERT_WINDOW).length;
   document.getElementById('mTagUrgent').textContent = tagUrgent;
   document.getElementById('mOtherUrgent').textContent = otherUrgent;
+  // additional derived metrics
+  const total = DB.vehicles.length;
+  const activeCount = DB.vehicles.filter(v=>v.status==='aktif').length;
+  const maintenanceCount = DB.vehicles.filter(v=>v.status==='perbaikan').length;
+  const inactiveCount = DB.vehicles.filter(v=>v.status==='idle').length;
+  const activePct = total? Math.round((activeCount/total)*100) : 0;
+  document.getElementById('mVehiclesSub').textContent = `${activeCount} aktif · ${activePct}%`;
+  document.getElementById('mTagUrgentSub').textContent = `${tagUrgent} unit Priority`;
+  document.getElementById('mOtherUrgentSub').textContent = `${otherUrgent} unit Priority`;
+  document.getElementById('mOpenReportsSub').textContent = `${DB.reports.filter(r=>r.status==='open').length} terbuka`;
+  // compute average days to primary doc expiry (for informative dashboard metric)
+  const daysList = primaries.map(x=>x.doc.days).filter(d=>typeof d==='number');
+  const avg = daysList.length ? Math.round(daysList.reduce((a,b)=>a+b,0)/daysList.length) : null;
+  document.getElementById('mAvgExpiry').textContent = avg===null ? '-' : (avg + ' hari');
 
   const dokList = document.getElementById('dashDokumenList');
   const urgent = primaries.filter(x=>x.doc.days<=ALERT_WINDOW)
-    .sort((a,b)=> (a.doc.label==='PTFI TAG'?-1:0) - (b.doc.label==='PTFI TAG'?-1:0) || a.doc.days - b.doc.days)
+    .sort((a,b)=> (a.doc.label==='PTFI TAGGING'?-1:0) - (b.doc.label==='PTFI TAGGING'?-1:0) || a.doc.days - b.doc.days)
     .slice(0,4);
   if(!urgent.length){
-    dokList.innerHTML = `<div class="empty-state"><p>Tidak ada PTFI TAG/STNK/Pajak/KEUR yang mendekati expired.</p></div>`;
+    dokList.innerHTML = `<div class="empty-state"><p>Tidak ada PTFI TAGGING/STNK/Pajak/KEUR yang mendekati expired.</p></div>`;
   } else {
     dokList.innerHTML = urgent.map(({v,doc})=>{
-      const badge = doc.days<=0 ? 'badge-warn' : doc.days<=30 ? 'badge-warn' : 'badge-idle';
+      const urgentFlag = typeof doc.days==='number' && doc.days<=30;
+      const badgeCls = doc.days<=0 ? 'badge-warn' : urgentFlag ? 'badge-warn' : 'badge-idle';
+      const typeCls = doc.key ? ' badge-' + doc.key : '';
+      const badgeExtra = urgentFlag ? ' badge-urgent' : '';
       const daysText = doc.days<=0 ? `Lewat ${Math.abs(doc.days)} hari` : `${doc.days} hari lagi`;
       return `<div class="item-card" onclick="goTo('dokumen')">
         <div class="item-row">
           <div>
-            <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}" style="text-transform:none;">${doc.label}</span></div>
-            <div class="item-sub" style="margin-top:6px;">${fmtDate(doc.date)}</div>
+            <div class="item-row" style="gap:8px;">${vehicleIcon(v)}<div style="display:inline-block; min-width:220px;">
+              <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v.plat}</span><span class="badge ${badgeCls}${typeCls}${badgeExtra}" style="text-transform:none;">${doc.label}</span></div>
+              <div class="item-sub" style="margin-top:6px; font-weight:700; color:var(--text);">${v.equipmentName? v.equipmentName : '-'}</div>
+              <div class="item-sub" style="margin-top:6px; color:var(--muted);">${fmtDate(doc.date)}</div>
+            </div></div>
+          </div>
+          <div class="item-sub" style="color:${doc.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+        </div>
+      </div>`;
+      return `<div class="item-card" onclick="goTo('dokumen')">
+        <div class="item-row">
+          <div>
+            <div class="item-row" style="gap:8px;">${vehicleIcon(v)}<div style="display:inline-block; min-width:220px;">
+              <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v.plat}</span><span class="badge ${badgeCls}${typeCls}${badgeExtra}" style="text-transform:none;">${badgeIconHTML(doc.key)} ${doc.label}</span></div>
+              <div class="item-sub" style="margin-top:6px; font-weight:700; color:var(--text);">${v.equipmentName? v.equipmentName : '-'}</div>
+              <div class="item-sub" style="margin-top:6px; color:var(--muted);">${fmtDate(doc.date)}</div>
+            </div></div>
           </div>
           <div class="item-sub" style="color:${doc.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
         </div>
@@ -1159,8 +1680,8 @@ function renderDashboard(){
     return `<div class="item-card" onclick="goTo('laporan')">
       <div class="item-row">
         <div>
-          <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="badge badge-warn">${r.tingkat}</span></div>
-          <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>60?r.deskripsi.slice(0,60)+'…':r.deskripsi}</div>
+          <div class="item-row" style="gap:8px;">${vehicleIcon(v)}<div style="display:inline-block;"><div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'?'}</span><span class="badge badge-warn">${r.tingkat}</span></div>
+          <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>60?r.deskripsi.slice(0,60)+'…':r.deskripsi}</div></div></div>
         </div>
         <div class="item-sub">${fmtDate(r.tanggal)}</div>
       </div>
@@ -1187,7 +1708,7 @@ function renderAll(){
    dari seluruh kendaraan, diurutkan dari yang paling dekat
    ============================================================ */
 const DOKUMEN_TYPES = [
-  { key: 'tag', label: 'PTFI TAG', field: 'ptfiTagExpired' },
+  { key: 'tag', label: 'PTFI TAGGING', field: 'ptfiTagExpired' },
   { key: 'stnk', label: 'STNK', field: 'stnkExpired' },
   { key: 'pajak', label: 'Pajak', field: 'pajakExpired' },
   { key: 'keur', label: 'KEUR', field: 'keurExpired' },
@@ -1203,38 +1724,61 @@ function setDokumenFilter(f){
 function renderDokumen(){
   const list = document.getElementById('dokumenList');
   if(!list) return;
-  let items = [];
+  // group documents per equipment
+  const items = [];
   DB.vehicles.forEach(v=>{
+    const docs = [];
     DOKUMEN_TYPES.forEach(t=>{
       const dateVal = v[t.field];
       if(!dateVal) return;
-      if(dokumenFilter!=='all' && dokumenFilter!==t.key) return;
-      items.push({ label: v.plat, sub: t.label, date: dateVal, days: daysUntil(dateVal), openFn: () => openVehicleForm(v) });
+      docs.push({ key: t.key, label: t.label, date: dateVal, days: daysUntil(dateVal) });
     });
+    if(docs.length===0) return;
+    if(dokumenFilter!=='all' && dokumenFilter!=='tera' && !docs.find(d=>d.key===dokumenFilter)) return;
+    items.push({ type: 'vehicle', id: v.id, plate: v.plat, name: v.equipmentName||'', docs });
   });
   if(dokumenFilter==='all' || dokumenFilter==='tera'){
     DB.peralatan.forEach(p=>{
-      if(!p.teraExpired) return;
-      items.push({ label: p.namaAlat, sub: 'Tera/Uji Riksa', date: p.teraExpired, days: daysUntil(p.teraExpired), openFn: () => openPeralatanForm(p) });
+      const docs = [];
+      if(p.teraExpired) docs.push({ key:'tera', label:'Tera/Uji Riksa', date: p.teraExpired, days: daysUntil(p.teraExpired) });
+      if(docs.length===0) return;
+      items.push({ type: 'peralatan', id: p.id, plate: p.kodeAlat||'', name: p.namaAlat||'', docs });
     });
   }
-  items.sort((a,b)=> a.days - b.days);
   if(!items.length){
     list.innerHTML = `<div class="empty-state"><p>Belum ada tanggal dokumen/tagging/tera yang diisi.<br>Isi lewat menu Armada atau Peralatan.</p></div>`;
     return;
   }
+  items.sort((a,b)=>{
+    const da = a.docs.map(d=>typeof d.days==='number'?d.days:9999).reduce((m,x)=>Math.min(m,x),9999);
+    const db = b.docs.map(d=>typeof d.days==='number'?d.days:9999).reduce((m,x)=>Math.min(m,x),9999);
+    return da - db;
+  });
   window.__dokumenItems = items;
   list.innerHTML = items.map((it,i)=>{
-    const badge = it.days<=0 ? 'badge-warn' : it.days<=30 ? 'badge-warn' : it.days<=60 ? 'badge-idle' : 'badge-ok';
-    const daysText = it.days<=0 ? `Lewat ${Math.abs(it.days)} hari` : `${it.days} hari lagi`;
-    return `<div class="item-card" onclick='window.__dokumenItems[${i}].openFn()'>
+    const badges = it.docs.map(d=>{
+      const urgent = (typeof d.days==='number') && d.days<=30;
+      const urgencyCls = d.days<=0 ? 'badge-warn' : urgent ? 'badge-warn' : d.days<=60 ? 'badge-idle' : 'badge-ok';
+      const extra = urgent ? ' badge-urgent' : '';
+      const typeCls = d.key ? ' badge-' + d.key : '';
+      const short = (typeof d.days==='number') ? (d.days<=0?`Lewat ${Math.abs(d.days)}h`:`${d.days}h`) : '';
+      return `<span class="badge ${urgencyCls}${typeCls}${extra}" style="margin-right:8px; font-weight:700; text-transform:none; font-size:12px;">${badgeIconHTML(d.key)} ${d.label}${short? ' · '+short : ''}</span>`;
+    }).join('');
+    const nearest = it.docs.map(d=>typeof d.days==='number'?d.days:9999).reduce((m,x)=>Math.min(m,x),9999);
+    const daysText = nearest===9999?'-':(nearest<=0?`Lewat ${Math.abs(nearest)} hari`:`${nearest} hari lagi`);
+    const openCall = it.type==='vehicle' ? `openVehicleAction("${it.id}")` : `openPeralatanAction("${it.id}")`;
+    return `<div class="item-card" onclick='${openCall}'>
       <div class="item-row">
-        <div>
-          <div class="item-row" style="gap:8px;"><span class="plate">${it.label}</span><span class="badge ${badge}" style="text-transform:none;">${it.sub}</span></div>
-          <div class="item-sub" style="margin-top:6px;">${fmtDate(it.date)}</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div class="veh-icon">${vehicleIcon(it.type==='vehicle'? DB.vehicles.find(v=>v.id===it.id) : DB.peralatan.find(p=>p.id===it.id))}</div>
+          <div style="min-width:260px;">
+            <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${it.plate}</span></div>
+            <div class="item-title" style="margin-top:6px;">${it.name? it.name : '-'}</div>
+            <div style="margin-top:8px;">${badges}</div>
+          </div>
         </div>
         <div style="text-align:right;">
-          <div class="item-sub" style="color:${it.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+          <div class="item-sub" style="color:${nearest<=30?'var(--red)':'var(--text)'}; font-weight:700;">${daysText}</div>
         </div>
       </div>
     </div>`;
@@ -1247,6 +1791,42 @@ function renderDokumen(){
 window.addEventListener('load', () => {
   document.getElementById('nameInput').focus();
 });
+
+/* Theme system: export CSS variables as JS themes and allow switching */
+const THEMES = {
+  corporate: {
+    '--bg':'#F4F7FB','--surface':'#FFFFFF','--surface2':'#F3F6FA','--border':'#D6E8FB',
+    '--text':'#071424','--muted':'#475569','--primary':'#2563EB','--primary-dim':'#1E40AF',
+    '--green':'#10B981','--green-bg':'#ECFDF5','--red':'#EF4444','--red-bg':'#FFF1F2'
+  },
+  light: {
+    '--bg':'#FFFFFF','--surface':'#FFFFFF','--surface2':'#FBFDFF','--border':'#E6EEF6',
+    '--text':'#0B1724','--muted':'#6B7280','--primary':'#1E40AF','--primary-dim':'#153E7A',
+    '--green':'#10B981','--green-bg':'#ECFDF5','--red':'#EF4444','--red-bg':'#FFF1F2'
+  },
+  dark: {
+    '--bg':'#0B1220','--surface':'#0F1724','--surface2':'#0B1224','--border':'#14232F',
+    '--text':'#E6EEF6','--muted':'#9AA6B2','--primary':'#60A5FA','--primary-dim':'#3B82F6',
+    '--green':'#34D399','--green-bg':'#052F1F','--red':'#F87171','--red-bg':'#2D0A0A'
+  }
+};
+
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.corporate;
+  Object.keys(t).forEach(k=> document.documentElement.style.setProperty(k, t[k]));
+  localStorage.setItem('fleet_theme', name);
+  const sel = document.getElementById('themeSelect'); if(sel) sel.value = name;
+}
+
+function changeTheme(name){ applyTheme(name); }
+
+// apply saved theme on load
+const savedTheme = localStorage.getItem('fleet_theme') || 'corporate';
+applyTheme(savedTheme);
+
+// apply any image mappings in-memory (useful if DB already present)
+applyImageMappings();
+renderAll();
 </script>
 </body>
 </html>
