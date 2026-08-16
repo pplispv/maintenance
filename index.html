@@ -124,6 +124,8 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .field textarea{resize:vertical; min-height:70px;}
 .field-row{display:flex; gap:10px;}
 .field-row .field{flex:1;}
+.form-section-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--amber); margin:18px 0 8px; padding-top:12px; border-top:1px solid var(--border);}
+.form-section-label:first-of-type{margin-top:2px; padding-top:0; border-top:none;}
 
 /* Modal / detail sheet */
 .sheet-overlay{
@@ -151,11 +153,11 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   border-top:1px solid var(--border); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
 }
 .nav-btn{
-  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px;
-  color:var(--muted); cursor:pointer; border-radius:9px;
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 1px;
+  color:var(--muted); cursor:pointer; border-radius:9px; min-width:0;
 }
-.nav-btn svg{width:20px; height:20px;}
-.nav-btn span{font-size:10px; font-weight:500;}
+.nav-btn svg{width:19px; height:19px;}
+.nav-btn span{font-size:9.5px; font-weight:500; white-space:nowrap;}
 .nav-btn.active{color:var(--amber);}
 
 .fab{
@@ -223,20 +225,40 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
       <div class="metric-value" id="mVehicles">0</div>
     </div>
     <div class="metric-card">
+      <div class="metric-label">PTFI TAG mendesak</div>
+      <div class="metric-value red" id="mTagUrgent">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Dokumen lain mendesak</div>
+      <div class="metric-value amber" id="mOtherUrgent">0</div>
+    </div>
+    <div class="metric-card">
       <div class="metric-label">Laporan terbuka</div>
       <div class="metric-value red" id="mOpenReports">0</div>
     </div>
-    <div class="metric-card">
-      <div class="metric-label">Servis 30 hari ini</div>
-      <div class="metric-value amber" id="mRecentService">0</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">KM tercatat bulan ini</div>
-      <div class="metric-value green" id="mKmThisMonth">0</div>
-    </div>
   </div>
+  <div class="section-head"><div class="section-title" style="font-size:14px;">Tagging &amp; dokumen paling mendesak</div></div>
+  <div class="card-list" id="dashDokumenList" style="margin-bottom:20px;"></div>
   <div class="section-head"><div class="section-title" style="font-size:14px;">Laporan abnormal terbaru</div></div>
   <div class="card-list" id="dashReportsList"></div>
+</div>
+
+<!-- DOKUMEN / TAGGING MONITORING -->
+<div class="screen" id="screen-dokumen">
+  <div class="section-head">
+    <div>
+      <div class="section-title">Tagging &amp; Dokumen</div>
+      <div class="section-note">Urut dari yang paling dekat expired</div>
+    </div>
+  </div>
+  <div class="seg" id="dokumenFilterSeg">
+    <div class="seg-btn active" data-f="all" onclick="setDokumenFilter('all')">Semua</div>
+    <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">PTFI TAG</div>
+    <div class="seg-btn" data-f="stnk" onclick="setDokumenFilter('stnk')">STNK</div>
+    <div class="seg-btn" data-f="pajak" onclick="setDokumenFilter('pajak')">Pajak</div>
+    <div class="seg-btn" data-f="keur" onclick="setDokumenFilter('keur')">KEUR</div>
+  </div>
+  <div class="card-list" id="dokumenList"></div>
 </div>
 
 <!-- ARMADA -->
@@ -302,6 +324,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
     <span>Dashboard</span>
   </div>
+  <div class="nav-btn" data-screen="dokumen" onclick="goTo('dokumen')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+    <span>Dokumen</span>
+  </div>
   <div class="nav-btn" data-screen="armada" onclick="goTo('armada')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>
     <span>Armada</span>
@@ -350,6 +376,7 @@ const CONFIG = {
 let DB = { vehicles: [], kmLogs: [], services: [], reports: [] };
 let currentUserName = "Pengguna";
 let reportFilter = "all";
+let dokumenFilter = "all";
 let activeScreen = "dashboard";
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -482,11 +509,28 @@ function openVehicleForm(existing){
       <div class="sheet-title">${existing ? 'Ubah kendaraan' : 'Tambah kendaraan'}</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
-    <div class="field"><label>Plat nomor</label><input id="fPlat" value="${v.plat||''}" placeholder="cth. N 1757 TA"></div>
+
+    <div class="form-section-label">Identitas Equipment</div>
     <div class="field-row">
-      <div class="field"><label>Jenis</label><input id="fJenis" value="${v.jenis||''}" placeholder="cth. Pickup / Dump Truck"></div>
-      <div class="field"><label>Merk / model</label><input id="fMerk" value="${v.merk||''}" placeholder="cth. Toyota Hilux"></div>
+      <div class="field"><label>Equipment Code</label><input id="fEquipCode" value="${v.equipmentCode||''}" placeholder="cth. EQ-0142"></div>
+      <div class="field"><label>Equipment Name</label><input id="fEquipName" value="${v.equipmentName||''}" placeholder="cth. Dump Truck 01"></div>
     </div>
+    <div class="field"><label>Contract Number</label><input id="fContract" value="${v.contractNumber||''}" placeholder="cth. CTR-2026-0031"></div>
+
+    <div class="form-section-label">Identification</div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><input id="fJenis" value="${v.jenis||''}" placeholder="cth. Pickup / Dump Truck"></div>
+      <div class="field"><label>Brand</label><input id="fMerk" value="${v.merk||''}" placeholder="cth. Toyota"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Model</label><input id="fModel" value="${v.model||''}" placeholder="cth. Hilux"></div>
+      <div class="field"><label>Vehicle/Serial Number</label><input id="fSerial" value="${v.serialNumber||''}" placeholder="cth. plat / no. rangka"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Owner</label><input id="fOwner" value="${v.owner||''}" placeholder="cth. PTFI"></div>
+      <div class="field"><label>Capacity</label><input id="fKapasitas" value="${v.kapasitas||''}" placeholder="cth. 5 ton"></div>
+    </div>
+    <div class="field"><label>Plat nomor</label><input id="fPlat" value="${v.plat||''}" placeholder="cth. N 1757 TA"></div>
     <div class="field-row">
       <div class="field"><label>Tahun</label><input id="fTahun" type="number" value="${v.tahun||''}" placeholder="2019"></div>
       <div class="field"><label>Lokasi/area</label><input id="fLokasi" value="${v.lokasi||''}" placeholder="cth. Smelter A"></div>
@@ -498,6 +542,20 @@ function openVehicleForm(existing){
         <option value="perbaikan" ${v.status==='perbaikan'?'selected':''}>Dalam perbaikan</option>
       </select>
     </div>
+
+    <div class="form-section-label">PTFI TAG</div>
+    <div class="field"><label>PTFI TAG Expired Date</label><input id="fPtfiTag" type="date" value="${v.ptfiTagExpired||''}"></div>
+
+    <div class="form-section-label">Monitoring STNK &amp; Pajak</div>
+    <div class="field-row">
+      <div class="field"><label>STNK Expired Date</label><input id="fStnk" type="date" value="${v.stnkExpired||''}"></div>
+      <div class="field"><label>PAJAK Expired Date</label><input id="fPajak" type="date" value="${v.pajakExpired||''}"></div>
+    </div>
+
+    <div class="form-section-label">KEUR - Monitoring</div>
+    <div class="field"><label>Inspection Number</label><input id="fInspeksi" value="${v.inspectionNumber||''}" placeholder="cth. INS-2026-091"></div>
+    <div class="field"><label>KEUR Expired Date</label><input id="fKeur" type="date" value="${v.keurExpired||''}"></div>
+
     <button class="btn btn-primary btn-full" onclick="saveVehicle('${v.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deleteVehicle('${v.id}')">Hapus kendaraan</button>` : ''}
   `);
@@ -511,7 +569,19 @@ function saveVehicle(id){
     merk: document.getElementById('fMerk').value.trim(),
     tahun: document.getElementById('fTahun').value.trim(),
     lokasi: document.getElementById('fLokasi').value.trim(),
-    status: document.getElementById('fStatus').value
+    status: document.getElementById('fStatus').value,
+    equipmentCode: document.getElementById('fEquipCode').value.trim(),
+    equipmentName: document.getElementById('fEquipName').value.trim(),
+    contractNumber: document.getElementById('fContract').value.trim(),
+    model: document.getElementById('fModel').value.trim(),
+    serialNumber: document.getElementById('fSerial').value.trim(),
+    owner: document.getElementById('fOwner').value.trim(),
+    kapasitas: document.getElementById('fKapasitas').value.trim(),
+    ptfiTagExpired: document.getElementById('fPtfiTag').value,
+    stnkExpired: document.getElementById('fStnk').value,
+    pajakExpired: document.getElementById('fPajak').value,
+    inspectionNumber: document.getElementById('fInspeksi').value.trim(),
+    keurExpired: document.getElementById('fKeur').value
   };
   if(id){
     const v = DB.vehicles.find(x=>x.id===id);
@@ -528,6 +598,61 @@ function deleteVehicle(id){
   closeSheet(); renderAll(); saveToSheet();
 }
 
+/* EXP days helper: null date -> null, else integer days remaining (negative = expired) */
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  if(isNaN(d.getTime())) return null;
+  const today = new Date(todayStr() + 'T00:00:00');
+  return Math.round((d - today) / 86400000);
+}
+
+function expChip(label, dateStr){
+  const days = daysUntil(dateStr);
+  if(days === null) return '';
+  let cls = 'badge-ok';
+  if(days <= 0) cls = 'badge-warn';
+  else if(days <= 30) cls = 'badge-warn';
+  else if(days <= 60) cls = 'badge-idle';
+  const text = days <= 0 ? `${label} lewat ${Math.abs(days)}h` : `${label} ${days}h lagi`;
+  return `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+}
+
+/* PTFI TAG adalah indikator utama. Kalau TAG dalam zona waspada
+   (sudah lewat atau ≤60 hari), itu yang ditampilkan. Kalau TAG
+   masih aman, baru tampilkan yang paling mendesak di antara
+   STNK / Pajak / KEUR. Kalau tidak ada yang mendesak sama sekali,
+   tampilkan status TAG apa adanya (sebagai info utama default). */
+const ALERT_WINDOW = 60;
+function getPrimaryDoc(v){
+  const tagDays = daysUntil(v.ptfiTagExpired);
+  const others = [
+    { label: 'STNK', date: v.stnkExpired, days: daysUntil(v.stnkExpired) },
+    { label: 'Pajak', date: v.pajakExpired, days: daysUntil(v.pajakExpired) },
+    { label: 'KEUR', date: v.keurExpired, days: daysUntil(v.keurExpired) }
+  ].filter(o => o.days !== null);
+
+  if(tagDays !== null && tagDays <= ALERT_WINDOW){
+    return { label: 'PTFI TAG', date: v.ptfiTagExpired, days: tagDays };
+  }
+  const urgentOthers = others.filter(o => o.days <= ALERT_WINDOW).sort((a,b)=>a.days-b.days);
+  if(urgentOthers.length) return urgentOthers[0];
+  if(tagDays !== null) return { label: 'PTFI TAG', date: v.ptfiTagExpired, days: tagDays };
+  const rest = others.sort((a,b)=>a.days-b.days);
+  return rest.length ? rest[0] : null;
+}
+
+function primaryDocChip(v){
+  const doc = getPrimaryDoc(v);
+  if(!doc) return '';
+  let cls = 'badge-ok';
+  if(doc.days <= 0) cls = 'badge-warn';
+  else if(doc.days <= 30) cls = 'badge-warn';
+  else if(doc.days <= 60) cls = 'badge-idle';
+  const text = doc.days <= 0 ? `${doc.label} lewat ${Math.abs(doc.days)} hari` : `${doc.label} ${doc.days} hari lagi`;
+  return `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+}
+
 function renderVehicles(){
   const list = document.getElementById('vehicleList');
   if(!DB.vehicles.length){
@@ -540,17 +665,21 @@ function renderVehicles(){
   list.innerHTML = DB.vehicles.map(v=>{
     const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
     const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
+    const chip = primaryDocChip(v);
+    const subLine = [v.equipmentName, v.merk, v.model, v.jenis, v.tahun].filter(Boolean).join(' · ');
     return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(v).replace(/'/g,"&apos;")})'>
       <div class="item-row">
         <div>
           <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}">${v.status}</span></div>
-          <div class="item-sub">${[v.merk,v.jenis,v.tahun].filter(Boolean).join(' · ')||'-'}</div>
+          <div class="item-sub">${subLine||'-'}</div>
+          ${v.equipmentCode?`<div class="item-sub">Kode: ${v.equipmentCode}${v.contractNumber?' · Kontrak: '+v.contractNumber:''}</div>`:''}
         </div>
         <div style="text-align:right;">
           <div class="item-sub">${v.lokasi||''}</div>
           <div class="item-sub" style="font-family:var(--font-mono); color:var(--text); margin-top:2px;">${lastKm ? lastKm.km.toLocaleString('id-ID')+' km' : 'belum ada KM'}</div>
         </div>
       </div>
+      ${chip ? `<div style="margin-top:10px;">${chip}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -775,10 +904,34 @@ function renderDashboard(){
   document.getElementById('dashDate').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
   document.getElementById('mVehicles').textContent = DB.vehicles.length;
   document.getElementById('mOpenReports').textContent = DB.reports.filter(r=>r.status==='open').length;
-  const cutoff = Date.now() - 30*24*60*60*1000;
-  document.getElementById('mRecentService').textContent = DB.services.filter(s=>new Date(s.tanggal).getTime()>=cutoff).length;
-  const monthPrefix = todayStr().slice(0,7);
-  document.getElementById('mKmThisMonth').textContent = DB.kmLogs.filter(k=>k.tanggal.startsWith(monthPrefix)).length;
+
+  const primaries = DB.vehicles.map(v=>({ v, doc: getPrimaryDoc(v) })).filter(x=>x.doc);
+  const tagUrgent = primaries.filter(x=>x.doc.label==='PTFI TAG' && x.doc.days<=ALERT_WINDOW).length;
+  const otherUrgent = primaries.filter(x=>x.doc.label!=='PTFI TAG' && x.doc.days<=ALERT_WINDOW).length;
+  document.getElementById('mTagUrgent').textContent = tagUrgent;
+  document.getElementById('mOtherUrgent').textContent = otherUrgent;
+
+  const dokList = document.getElementById('dashDokumenList');
+  const urgent = primaries.filter(x=>x.doc.days<=ALERT_WINDOW)
+    .sort((a,b)=> (a.doc.label==='PTFI TAG'?-1:0) - (b.doc.label==='PTFI TAG'?-1:0) || a.doc.days - b.doc.days)
+    .slice(0,4);
+  if(!urgent.length){
+    dokList.innerHTML = `<div class="empty-state"><p>Tidak ada PTFI TAG/STNK/Pajak/KEUR yang mendekati expired.</p></div>`;
+  } else {
+    dokList.innerHTML = urgent.map(({v,doc})=>{
+      const badge = doc.days<=0 ? 'badge-warn' : doc.days<=30 ? 'badge-warn' : 'badge-idle';
+      const daysText = doc.days<=0 ? `Lewat ${Math.abs(doc.days)} hari` : `${doc.days} hari lagi`;
+      return `<div class="item-card" onclick="goTo('dokumen')">
+        <div class="item-row">
+          <div>
+            <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}" style="text-transform:none;">${doc.label}</span></div>
+            <div class="item-sub" style="margin-top:6px;">${fmtDate(doc.date)}</div>
+          </div>
+          <div class="item-sub" style="color:${doc.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 
   const list = document.getElementById('dashReportsList');
   const open = [...DB.reports].filter(r=>r.status==='open').sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,4);
@@ -805,11 +958,63 @@ function renderDashboard(){
    ============================================================ */
 function renderAll(){
   renderDashboard();
+  renderDokumen();
   renderVehicles();
   populateVehicleSelect();
   renderKmHistory();
   renderServices();
   renderReports();
+}
+
+/* ============================================================
+   DOKUMEN / TAGGING MONITORING — gabungan semua tanggal expired
+   dari seluruh kendaraan, diurutkan dari yang paling dekat
+   ============================================================ */
+const DOKUMEN_TYPES = [
+  { key: 'tag', label: 'PTFI TAG', field: 'ptfiTagExpired' },
+  { key: 'stnk', label: 'STNK', field: 'stnkExpired' },
+  { key: 'pajak', label: 'Pajak', field: 'pajakExpired' },
+  { key: 'keur', label: 'KEUR', field: 'keurExpired' }
+];
+
+function setDokumenFilter(f){
+  dokumenFilter = f;
+  document.querySelectorAll('#dokumenFilterSeg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  renderDokumen();
+}
+
+function renderDokumen(){
+  const list = document.getElementById('dokumenList');
+  if(!list) return;
+  let items = [];
+  DB.vehicles.forEach(v=>{
+    DOKUMEN_TYPES.forEach(t=>{
+      const dateVal = v[t.field];
+      if(!dateVal) return;
+      if(dokumenFilter!=='all' && dokumenFilter!==t.key) return;
+      items.push({ vehicle: v, type: t, date: dateVal, days: daysUntil(dateVal) });
+    });
+  });
+  items.sort((a,b)=> a.days - b.days);
+  if(!items.length){
+    list.innerHTML = `<div class="empty-state"><p>Belum ada tanggal dokumen/tagging yang diisi.<br>Isi lewat menu Armada &gt; tambah/ubah kendaraan.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(it=>{
+    const badge = it.days<=0 ? 'badge-warn' : it.days<=30 ? 'badge-warn' : it.days<=60 ? 'badge-idle' : 'badge-ok';
+    const daysText = it.days<=0 ? `Lewat ${Math.abs(it.days)} hari` : `${it.days} hari lagi`;
+    return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(it.vehicle).replace(/'/g,"&apos;")})'>
+      <div class="item-row">
+        <div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${it.vehicle.plat}</span><span class="badge ${badge}" style="text-transform:none;">${it.type.label}</span></div>
+          <div class="item-sub" style="margin-top:6px;">${fmtDate(it.date)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub" style="color:${it.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ============================================================
