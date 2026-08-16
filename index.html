@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fleet Maintenance — PTFI</title>
+<title>Fleet Equipment Management — PTFI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -13,10 +13,10 @@
    CONFIG — isi ini sebelum deploy
    ============================================================ */
 :root{
-  --bg:#12161C; --surface:#1B212B; --surface2:#222B36; --border:#2A3340;
-  --text:#E8EDF2; --muted:#8A96A3; --amber:#F2A93B; --amber-dim:#7A5A20;
-  --green:#4CAF7D; --green-bg:#193325; --red:#E5533D; --red-bg:#33201B;
-  --blue:#4A90D9; --radius:10px;
+  --bg:#0B0F14; --surface:#141B22; --surface2:#1C242E; --border:#28323D;
+  --text:#EDF2F5; --muted:#8996A3; --amber:#2DD4BF; --amber-dim:#0F5C52;
+  --green:#34D399; --green-bg:#0F3327; --red:#F87171; --red-bg:#3A1E1E;
+  --blue:#60A5FA; --radius:14px;
   --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
@@ -34,9 +34,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
 }
 .brand{display:flex; align-items:center; gap:9px;}
-.brand-mark{width:28px; height:28px; border-radius:7px; background:var(--amber); display:flex; align-items:center; justify-content:center;}
+.brand-mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(150deg, var(--amber), #17A398); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(45,212,191,0.35);}
 .brand-mark svg{width:16px; height:16px;}
-.brand-text{font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:-0.2px;}
+.brand-text{font-family:var(--font-display); font-weight:600; font-size:13.5px; letter-spacing:-0.2px; white-space:nowrap;}
 .brand-sub{font-size:10.5px; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase;}
 .sync-pill{
   display:flex; align-items:center; gap:6px; font-size:11px; padding:5px 10px; border-radius:20px;
@@ -69,13 +69,13 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   background:var(--surface2); font-size:14px; font-weight:500; cursor:pointer; transition:transform .1s;
 }
 .btn:active{transform:scale(0.97);}
-.btn-primary{background:var(--amber); border-color:var(--amber); color:#1A1200;}
+.btn-primary{background:var(--amber); border-color:var(--amber); color:#04211C;}
 .btn-full{width:100%;}
 .btn-danger{background:var(--red-bg); border-color:#5A2C24; color:#F0968A;}
 
 /* Metric cards */
 .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;}
-.metric-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px;}
+.metric-card{background:linear-gradient(160deg, var(--surface2), var(--surface)); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:0 2px 10px rgba(0,0,0,0.18);}
 .metric-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px;}
 .metric-value{font-family:var(--font-mono); font-size:26px; font-weight:700;}
 .metric-value.amber{color:var(--amber);}
@@ -94,9 +94,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .card-list{display:flex; flex-direction:column; gap:10px;}
 .item-card{
   background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:14px; cursor:pointer; transition:border-color .15s;
+  padding:14px; cursor:pointer; transition:border-color .15s, transform .1s; box-shadow:0 1px 8px rgba(0,0,0,0.14);
 }
-.item-card:active{border-color:var(--amber);}
+.item-card:active{border-color:var(--amber); transform:scale(0.99);}
 .item-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
 .item-title{font-weight:600; font-size:14.5px;}
 .item-sub{font-size:12px; color:var(--muted); margin-top:3px;}
@@ -124,8 +124,17 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .field textarea{resize:vertical; min-height:70px;}
 .field-row{display:flex; gap:10px;}
 .field-row .field{flex:1;}
+.date-field-row{display:flex; gap:6px;}
+.date-field-row select{
+  flex:1; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:11px 6px; font-size:13px; outline:none; appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238996A3' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 6px center; background-size:14px;
+}
+.date-field-row select:focus{border-color:var(--amber);}
 .form-section-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--amber); margin:18px 0 8px; padding-top:12px; border-top:1px solid var(--border);}
 .form-section-label:first-of-type{margin-top:2px; padding-top:0; border-top:none;}
+.formpage-head{display:flex; align-items:center; gap:12px; margin-bottom:18px; position:sticky; top:-18px; background:var(--bg); padding:2px 0 10px; z-index:5;}
 
 /* Modal / detail sheet */
 .sheet-overlay{
@@ -145,7 +154,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 /* Tabs (segmented) */
 .seg{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:3px; margin-bottom:16px;}
 .seg-btn{flex:1; text-align:center; padding:8px 4px; font-size:12.5px; font-weight:500; color:var(--muted); border-radius:7px; cursor:pointer;}
-.seg-btn.active{background:var(--amber); color:#1A1200; font-weight:600;}
+.seg-btn.active{background:var(--amber); color:#04211C; font-weight:600;}
 
 /* Bottom nav */
 .bottom-nav{
@@ -162,7 +171,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 
 .fab{
   position:fixed; bottom:88px; right:18px; z-index:15; width:52px; height:52px; border-radius:50%;
-  background:var(--amber); color:#1A1200; display:flex; align-items:center; justify-content:center;
+  background:var(--amber); color:#04211C; display:flex; align-items:center; justify-content:center;
   border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
 .fab svg{width:24px; height:24px;}
@@ -184,10 +193,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="topbar">
   <div class="brand">
     <div class="brand-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#1A1200" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4M3 17a2 2 0 1 0 4 0M16 17a2 2 0 1 0 4 0"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#04211C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4M3 17a2 2 0 1 0 4 0M16 17a2 2 0 1 0 4 0"/></svg>
     </div>
     <div>
-      <div class="brand-text">Fleet Maintenance</div>
+      <div class="brand-text">Fleet Equipment Mgmt</div>
       <div class="brand-sub">PTFI</div>
     </div>
   </div>
@@ -251,12 +260,14 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
       <div class="section-note">Urut dari yang paling dekat expired</div>
     </div>
   </div>
-  <div class="seg" id="dokumenFilterSeg">
+  <div class="seg" id="dokumenFilterSeg" style="overflow-x:auto;">
     <div class="seg-btn active" data-f="all" onclick="setDokumenFilter('all')">Semua</div>
     <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">PTFI TAG</div>
     <div class="seg-btn" data-f="stnk" onclick="setDokumenFilter('stnk')">STNK</div>
     <div class="seg-btn" data-f="pajak" onclick="setDokumenFilter('pajak')">Pajak</div>
     <div class="seg-btn" data-f="keur" onclick="setDokumenFilter('keur')">KEUR</div>
+    <div class="seg-btn" data-f="annual" onclick="setDokumenFilter('annual')" style="white-space:nowrap;">Annual</div>
+    <div class="seg-btn" data-f="tera" onclick="setDokumenFilter('tera')" style="white-space:nowrap;">Tera Alat</div>
   </div>
   <div class="card-list" id="dokumenList"></div>
 </div>
@@ -268,6 +279,26 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <button class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
   </div>
   <div class="card-list" id="vehicleList"></div>
+</div>
+
+<!-- PERALATAN -->
+<div class="screen" id="screen-peralatan">
+  <div class="section-head">
+    <div class="section-title">Peralatan</div>
+    <button class="btn" onclick="openPeralatanForm()">+ Alat</button>
+  </div>
+  <div class="card-list" id="peralatanList"></div>
+</div>
+
+<!-- FORM PAGE (halaman penuh untuk tambah/ubah, dipakai Armada & Peralatan) -->
+<div class="screen" id="screen-formpage">
+  <div class="formpage-head">
+    <div class="icon-btn" onclick="closeFormPage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="section-title" id="formPageTitle" style="font-size:16px;">Form</div>
+  </div>
+  <div id="formPageBody"></div>
 </div>
 
 <!-- CATAT KM -->
@@ -332,6 +363,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>
     <span>Armada</span>
   </div>
+  <div class="nav-btn" data-screen="peralatan" onclick="goTo('peralatan')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>
+    <span>Peralatan</span>
+  </div>
   <div class="nav-btn" data-screen="km" onclick="goTo('km')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
     <span>KM</span>
@@ -373,7 +408,7 @@ const CONFIG = {
 /* ============================================================
    STATE
    ============================================================ */
-let DB = { vehicles: [], kmLogs: [], services: [], reports: [] };
+let DB = { vehicles: [], peralatan: [], kmLogs: [], services: [], reports: [] };
 let currentUserName = "Pengguna";
 let reportFilter = "all";
 let dokumenFilter = "all";
@@ -382,6 +417,43 @@ let activeScreen = "dashboard";
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function fmtDate(d){ return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/* ============================================================
+   DATE FIELD (Tgl / Bulan / Tahun) — dropdown 3 kolom dengan
+   nama bulan Indonesia lengkap, dipakai di form Armada & Peralatan
+   ============================================================ */
+const ID_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+function dateFieldHTML(id, label, isoVal){
+  const d = isoVal ? new Date(isoVal + 'T00:00:00') : null;
+  const day = d && !isNaN(d) ? d.getDate() : '';
+  const month = d && !isNaN(d) ? d.getMonth()+1 : '';
+  const year = d && !isNaN(d) ? d.getFullYear() : '';
+  const dayOptions = Array.from({length:31}, (_,i)=>i+1)
+    .map(n=>`<option value="${n}" ${n===day?'selected':''}>${n}</option>`).join('');
+  const monthOptions = ID_MONTHS
+    .map((m,i)=>`<option value="${i+1}" ${i+1===month?'selected':''}>${m}</option>`).join('');
+  const curYear = new Date().getFullYear();
+  const yearOptions = Array.from({length:16}, (_,i)=>curYear-5+i)
+    .map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
+  return `
+    <div class="field">
+      <label>${label}</label>
+      <div class="date-field-row">
+        <select id="${id}_d"><option value="">Tgl</option>${dayOptions}</select>
+        <select id="${id}_m"><option value="">Bulan</option>${monthOptions}</select>
+        <select id="${id}_y"><option value="">Tahun</option>${yearOptions}</select>
+      </div>
+    </div>`;
+}
+
+function getDateFieldValue(id){
+  const d = document.getElementById(id+'_d').value;
+  const m = document.getElementById(id+'_m').value;
+  const y = document.getElementById(id+'_y').value;
+  if(!d || !m || !y) return '';
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
 function showToast(msg, type){
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + (type||'');
@@ -436,6 +508,7 @@ async function syncFromSheet(){
     const parsed = await res.json();
     DB = {
       vehicles: (parsed.vehicles || []).map(normalizeRow),
+      peralatan: (parsed.peralatan || []).map(normalizeRow),
       kmLogs: (parsed.kmLogs || []).map(normalizeRow),
       services: (parsed.services || []).map(normalizeRow),
       reports: (parsed.reports || []).map(normalizeRow)
@@ -480,18 +553,43 @@ function goTo(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+screen).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===screen));
+  document.getElementById('fab').classList.remove('hidden');
   renderAll();
 }
 
 function handleFab(){
   if(activeScreen==='armada') openVehicleForm();
+  else if(activeScreen==='peralatan') openPeralatanForm();
   else if(activeScreen==='servis') openServiceForm();
   else if(activeScreen==='laporan') openReportForm();
   else goTo('km');
 }
 
 /* ============================================================
-   SHEET (bottom modal for forms/detail)
+   FORM PAGE — halaman penuh untuk tambah/ubah data (bukan pop-up).
+   Dipakai oleh Armada & Peralatan. Setelah simpan, otomatis
+   kembali ke daftar (returnTo).
+   ============================================================ */
+let formPageReturnTo = 'dashboard';
+
+function openFormPage(title, bodyHtml, returnTo){
+  formPageReturnTo = returnTo;
+  document.getElementById('formPageTitle').textContent = title;
+  document.getElementById('formPageBody').innerHTML = bodyHtml;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-formpage').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===returnTo));
+  document.getElementById('fab').classList.add('hidden');
+  document.getElementById('bottomNav').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+function closeFormPage(){
+  goTo(formPageReturnTo);
+}
+
+/* ============================================================
+   SHEET (bottom modal) — masih dipakai untuk Servis & Laporan
    ============================================================ */
 function openSheet(html){
   document.getElementById('sheetContent').innerHTML = `<div class="sheet-handle"></div>` + html;
@@ -504,12 +602,7 @@ function closeSheet(){ document.getElementById('sheetOverlay').classList.remove(
    ============================================================ */
 function openVehicleForm(existing){
   const v = existing || {};
-  openSheet(`
-    <div class="sheet-head">
-      <div class="sheet-title">${existing ? 'Ubah kendaraan' : 'Tambah kendaraan'}</div>
-      <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
-    </div>
-
+  openFormPage(existing ? 'Ubah kendaraan' : 'Tambah kendaraan', `
     <div class="form-section-label">Identitas Equipment</div>
     <div class="field-row">
       <div class="field"><label>Equipment Code</label><input id="fEquipCode" value="${v.equipmentCode||''}" placeholder="cth. EQ-0142"></div>
@@ -544,21 +637,25 @@ function openVehicleForm(existing){
     </div>
 
     <div class="form-section-label">PTFI TAG</div>
-    <div class="field"><label>PTFI TAG Expired Date</label><input id="fPtfiTag" type="date" value="${v.ptfiTagExpired||''}"></div>
+    ${dateFieldHTML('fPtfiTag', 'PTFI TAG Expired Date', v.ptfiTagExpired)}
 
     <div class="form-section-label">Monitoring STNK &amp; Pajak</div>
     <div class="field-row">
-      <div class="field"><label>STNK Expired Date</label><input id="fStnk" type="date" value="${v.stnkExpired||''}"></div>
-      <div class="field"><label>PAJAK Expired Date</label><input id="fPajak" type="date" value="${v.pajakExpired||''}"></div>
+      ${dateFieldHTML('fStnk', 'STNK Expired Date', v.stnkExpired)}
+      ${dateFieldHTML('fPajak', 'PAJAK Expired Date', v.pajakExpired)}
     </div>
 
     <div class="form-section-label">KEUR - Monitoring</div>
     <div class="field"><label>Inspection Number</label><input id="fInspeksi" value="${v.inspectionNumber||''}" placeholder="cth. INS-2026-091"></div>
-    <div class="field"><label>KEUR Expired Date</label><input id="fKeur" type="date" value="${v.keurExpired||''}"></div>
+    ${dateFieldHTML('fKeur', 'KEUR Expired Date', v.keurExpired)}
+
+    <div class="form-section-label">PTFI Annual Inspection</div>
+    <div class="field"><label>Annual Inspection Number</label><input id="fAnnualNo" value="${v.annualInspNumber||''}" placeholder="cth. AI-2026-014"></div>
+    ${dateFieldHTML('fAnnualExp', 'Annual Inspection Expired Date', v.annualInspExpired)}
 
     <button class="btn btn-primary btn-full" onclick="saveVehicle('${v.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deleteVehicle('${v.id}')">Hapus kendaraan</button>` : ''}
-  `);
+  `, 'armada');
 }
 
 function saveVehicle(id){
@@ -577,11 +674,13 @@ function saveVehicle(id){
     serialNumber: document.getElementById('fSerial').value.trim(),
     owner: document.getElementById('fOwner').value.trim(),
     kapasitas: document.getElementById('fKapasitas').value.trim(),
-    ptfiTagExpired: document.getElementById('fPtfiTag').value,
-    stnkExpired: document.getElementById('fStnk').value,
-    pajakExpired: document.getElementById('fPajak').value,
+    ptfiTagExpired: getDateFieldValue('fPtfiTag'),
+    stnkExpired: getDateFieldValue('fStnk'),
+    pajakExpired: getDateFieldValue('fPajak'),
     inspectionNumber: document.getElementById('fInspeksi').value.trim(),
-    keurExpired: document.getElementById('fKeur').value
+    keurExpired: getDateFieldValue('fKeur'),
+    annualInspNumber: document.getElementById('fAnnualNo').value.trim(),
+    annualInspExpired: getDateFieldValue('fAnnualExp')
   };
   if(id){
     const v = DB.vehicles.find(x=>x.id===id);
@@ -589,13 +688,126 @@ function saveVehicle(id){
   } else {
     DB.vehicles.push({ id: uid(), ...data });
   }
-  closeSheet(); renderAll(); saveToSheet();
+  saveToSheet();
   showToast('Kendaraan disimpan', 'ok');
+  goTo('armada');
 }
 
 function deleteVehicle(id){
   DB.vehicles = DB.vehicles.filter(v=>v.id!==id);
-  closeSheet(); renderAll(); saveToSheet();
+  saveToSheet();
+  goTo('armada');
+}
+
+/* ============================================================
+   PERALATAN — alat non-kendaraan (timbangan, portable jack, dll)
+   yang perlu tera / uji riksa berkala
+   ============================================================ */
+function openPeralatanForm(existing){
+  const p = existing || {};
+  openFormPage(existing ? 'Ubah alat' : 'Tambah alat', `
+    <div class="form-section-label">Identitas Alat</div>
+    <div class="field-row">
+      <div class="field"><label>Kode Alat</label><input id="pKode" value="${p.kodeAlat||''}" placeholder="cth. AL-0031"></div>
+      <div class="field"><label>Nama Alat</label><input id="pNama" value="${p.namaAlat||''}" placeholder="cth. Timbangan Digital 500kg"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Jenis</label><input id="pJenis" value="${p.jenisAlat||''}" placeholder="cth. Timbangan / Portable Jack"></div>
+      <div class="field"><label>Merk</label><input id="pMerk" value="${p.merk||''}" placeholder="cth. Excell"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Model</label><input id="pModel" value="${p.model||''}" placeholder="cth. EX-500"></div>
+      <div class="field"><label>Nomor Seri</label><input id="pSerial" value="${p.noSeri||''}" placeholder="cth. SN-2023-0451"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Kapasitas</label><input id="pKapasitas" value="${p.kapasitas||''}" placeholder="cth. 500 kg / 10 ton"></div>
+      <div class="field"><label>Lokasi/area</label><input id="pLokasi" value="${p.lokasi||''}" placeholder="cth. Smelter A"></div>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="pStatus">
+        <option value="aktif" ${p.status==='aktif'?'selected':''}>Aktif</option>
+        <option value="idle" ${p.status==='idle'?'selected':''}>Idle</option>
+        <option value="rusak" ${p.status==='rusak'?'selected':''}>Rusak</option>
+      </select>
+    </div>
+
+    <div class="form-section-label">Tera / Uji Riksa</div>
+    <div class="field"><label>Nomor Sertifikat Tera/Uji Riksa</label><input id="pTeraNo" value="${p.teraNumber||''}" placeholder="cth. TERA-2026-088"></div>
+    ${dateFieldHTML('pTeraExp', 'Tanggal Expired Tera/Uji Riksa', p.teraExpired)}
+
+    <button class="btn btn-primary btn-full" onclick="savePeralatan('${p.id||''}')">Simpan</button>
+    ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deletePeralatan('${p.id}')">Hapus alat</button>` : ''}
+  `, 'peralatan');
+}
+
+function savePeralatan(id){
+  const nama = document.getElementById('pNama').value.trim();
+  if(!nama){ showToast('Nama alat wajib diisi', 'err'); return; }
+  const data = {
+    namaAlat: nama,
+    kodeAlat: document.getElementById('pKode').value.trim(),
+    jenisAlat: document.getElementById('pJenis').value.trim(),
+    merk: document.getElementById('pMerk').value.trim(),
+    model: document.getElementById('pModel').value.trim(),
+    noSeri: document.getElementById('pSerial').value.trim(),
+    kapasitas: document.getElementById('pKapasitas').value.trim(),
+    lokasi: document.getElementById('pLokasi').value.trim(),
+    status: document.getElementById('pStatus').value,
+    teraNumber: document.getElementById('pTeraNo').value.trim(),
+    teraExpired: getDateFieldValue('pTeraExp')
+  };
+  if(id){
+    const p = DB.peralatan.find(x=>x.id===id);
+    Object.assign(p, data);
+  } else {
+    DB.peralatan.push({ id: uid(), ...data });
+  }
+  saveToSheet();
+  showToast('Alat disimpan', 'ok');
+  goTo('peralatan');
+}
+
+function deletePeralatan(id){
+  DB.peralatan = DB.peralatan.filter(p=>p.id!==id);
+  saveToSheet();
+  goTo('peralatan');
+}
+
+function renderPeralatan(){
+  const list = document.getElementById('peralatanList');
+  if(!list) return;
+  if(!DB.peralatan.length){
+    list.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>
+      <p>Belum ada alat.<br>Tambahkan timbangan, portable jack, atau alat lain yang perlu tera/uji riksa.</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = DB.peralatan.map(p=>{
+    const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
+    const teraDays = daysUntil(p.teraExpired);
+    let teraChip = '';
+    if(teraDays !== null){
+      const cls = teraDays<=0 ? 'badge-warn' : teraDays<=30 ? 'badge-warn' : teraDays<=60 ? 'badge-idle' : 'badge-ok';
+      const text = teraDays<=0 ? `Tera lewat ${Math.abs(teraDays)} hari` : `Tera ${teraDays} hari lagi`;
+      teraChip = `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
+    }
+    const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
+    return `<div class="item-card" onclick='openPeralatanForm(${JSON.stringify(p).replace(/'/g,"&apos;")})'>
+      <div class="item-row">
+        <div>
+          <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--amber); margin-bottom:4px;">${p.namaAlat}</div>
+          <div class="item-row" style="gap:8px;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
+          <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="item-sub">${p.lokasi||''}</div>
+          <div class="item-sub">${p.noSeri||''}</div>
+        </div>
+      </div>
+      ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 /* EXP days helper: null date -> null, else integer days remaining (negative = expired) */
@@ -621,15 +833,17 @@ function expChip(label, dateStr){
 /* PTFI TAG adalah indikator utama. Kalau TAG dalam zona waspada
    (sudah lewat atau ≤60 hari), itu yang ditampilkan. Kalau TAG
    masih aman, baru tampilkan yang paling mendesak di antara
-   STNK / Pajak / KEUR. Kalau tidak ada yang mendesak sama sekali,
-   tampilkan status TAG apa adanya (sebagai info utama default). */
+   STNK / Pajak / KEUR / Annual Inspection. Kalau tidak ada yang
+   mendesak sama sekali, tampilkan status TAG apa adanya (sebagai
+   info utama default). */
 const ALERT_WINDOW = 60;
 function getPrimaryDoc(v){
   const tagDays = daysUntil(v.ptfiTagExpired);
   const others = [
     { label: 'STNK', date: v.stnkExpired, days: daysUntil(v.stnkExpired) },
     { label: 'Pajak', date: v.pajakExpired, days: daysUntil(v.pajakExpired) },
-    { label: 'KEUR', date: v.keurExpired, days: daysUntil(v.keurExpired) }
+    { label: 'KEUR', date: v.keurExpired, days: daysUntil(v.keurExpired) },
+    { label: 'Annual Inspection', date: v.annualInspExpired, days: daysUntil(v.annualInspExpired) }
   ].filter(o => o.days !== null);
 
   if(tagDays !== null && tagDays <= ALERT_WINDOW){
@@ -666,12 +880,13 @@ function renderVehicles(){
     const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
     const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
     const chip = primaryDocChip(v);
-    const subLine = [v.equipmentName, v.merk, v.model, v.jenis, v.tahun].filter(Boolean).join(' · ');
+    const subLine = [v.merk, v.model, v.jenis, v.tahun].filter(Boolean).join(' · ');
     return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(v).replace(/'/g,"&apos;")})'>
       <div class="item-row">
         <div>
+          ${v.equipmentName ? `<div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--amber); margin-bottom:4px;">${v.equipmentName}</div>` : ''}
           <div class="item-row" style="gap:8px;"><span class="plate">${v.plat}</span><span class="badge ${badge}">${v.status}</span></div>
-          <div class="item-sub">${subLine||'-'}</div>
+          <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
           ${v.equipmentCode?`<div class="item-sub">Kode: ${v.equipmentCode}${v.contractNumber?' · Kontrak: '+v.contractNumber:''}</div>`:''}
         </div>
         <div style="text-align:right;">
@@ -960,6 +1175,7 @@ function renderAll(){
   renderDashboard();
   renderDokumen();
   renderVehicles();
+  renderPeralatan();
   populateVehicleSelect();
   renderKmHistory();
   renderServices();
@@ -974,7 +1190,8 @@ const DOKUMEN_TYPES = [
   { key: 'tag', label: 'PTFI TAG', field: 'ptfiTagExpired' },
   { key: 'stnk', label: 'STNK', field: 'stnkExpired' },
   { key: 'pajak', label: 'Pajak', field: 'pajakExpired' },
-  { key: 'keur', label: 'KEUR', field: 'keurExpired' }
+  { key: 'keur', label: 'KEUR', field: 'keurExpired' },
+  { key: 'annual', label: 'Annual Inspection', field: 'annualInspExpired' }
 ];
 
 function setDokumenFilter(f){
@@ -992,21 +1209,28 @@ function renderDokumen(){
       const dateVal = v[t.field];
       if(!dateVal) return;
       if(dokumenFilter!=='all' && dokumenFilter!==t.key) return;
-      items.push({ vehicle: v, type: t, date: dateVal, days: daysUntil(dateVal) });
+      items.push({ label: v.plat, sub: t.label, date: dateVal, days: daysUntil(dateVal), openFn: () => openVehicleForm(v) });
     });
   });
+  if(dokumenFilter==='all' || dokumenFilter==='tera'){
+    DB.peralatan.forEach(p=>{
+      if(!p.teraExpired) return;
+      items.push({ label: p.namaAlat, sub: 'Tera/Uji Riksa', date: p.teraExpired, days: daysUntil(p.teraExpired), openFn: () => openPeralatanForm(p) });
+    });
+  }
   items.sort((a,b)=> a.days - b.days);
   if(!items.length){
-    list.innerHTML = `<div class="empty-state"><p>Belum ada tanggal dokumen/tagging yang diisi.<br>Isi lewat menu Armada &gt; tambah/ubah kendaraan.</p></div>`;
+    list.innerHTML = `<div class="empty-state"><p>Belum ada tanggal dokumen/tagging/tera yang diisi.<br>Isi lewat menu Armada atau Peralatan.</p></div>`;
     return;
   }
-  list.innerHTML = items.map(it=>{
+  window.__dokumenItems = items;
+  list.innerHTML = items.map((it,i)=>{
     const badge = it.days<=0 ? 'badge-warn' : it.days<=30 ? 'badge-warn' : it.days<=60 ? 'badge-idle' : 'badge-ok';
     const daysText = it.days<=0 ? `Lewat ${Math.abs(it.days)} hari` : `${it.days} hari lagi`;
-    return `<div class="item-card" onclick='openVehicleForm(${JSON.stringify(it.vehicle).replace(/'/g,"&apos;")})'>
+    return `<div class="item-card" onclick='window.__dokumenItems[${i}].openFn()'>
       <div class="item-row">
         <div>
-          <div class="item-row" style="gap:8px;"><span class="plate">${it.vehicle.plat}</span><span class="badge ${badge}" style="text-transform:none;">${it.type.label}</span></div>
+          <div class="item-row" style="gap:8px;"><span class="plate">${it.label}</span><span class="badge ${badge}" style="text-transform:none;">${it.sub}</span></div>
           <div class="item-sub" style="margin-top:6px;">${fmtDate(it.date)}</div>
         </div>
         <div style="text-align:right;">
