@@ -106,6 +106,11 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .metric-icon.icon-doc{background:linear-gradient(180deg, rgba(234,179,8,0.08), rgba(234,179,8,0.02)); color:#D97706}
 .metric-icon.icon-report{background:linear-gradient(180deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02)); color:#EF4444}
 .metric-icon.icon-calendar{background:linear-gradient(180deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02)); color:#6366F1}
+.metric-icon.icon-uptime{background:linear-gradient(180deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02)); color:#059669}
+.metric-icon.icon-cost{background:linear-gradient(180deg, rgba(37,99,235,0.1), rgba(37,99,235,0.02)); color:var(--primary)}
+.metric-icon.icon-mttr{background:linear-gradient(180deg, rgba(249,115,22,0.1), rgba(249,115,22,0.02)); color:#EA580C}
+.metric-icon.icon-mtbf{background:linear-gradient(180deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02)); color:#7C3AED}
+@media (max-width:720px){ .eval-grid{grid-template-columns:1fr !important;} }
 .metric-label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; font-weight:700}
 .metric-value{font-family:var(--font-mono); font-size:28px; font-weight:800; color:var(--primary);}
 .metric-value.amber{color:var(--primary);}
@@ -199,15 +204,38 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .badge-keur{background:#F43F5E; color:#fff}
 .badge-annual{background:#10B981; color:#04211C}
 .badge-tera{background:#3B82F6; color:#fff}
-.badge{font-size:11px; padding:5px 10px; border-radius:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;}
-.badge svg{width:14px; height:14px; vertical-align:middle; margin-right:6px; fill:currentColor; stroke:currentColor}
+.badge-maintenance{background:#8B5CF6; color:#fff}
+.badge{font-size:12px; padding:6px 10px; border-radius:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; display:inline-flex; align-items:center; gap:8px; margin:6px 8px 6px 0;}
+.badge svg{width:14px; height:14px; vertical-align:middle; margin:0; fill:currentColor; stroke:currentColor}
 .badge .badge-icon{display:inline-flex; align-items:center; justify-content:center}
 .badge-ok{background:var(--green); color:#04211C;} 
 .badge-warn{background:var(--red); color:#FFFFFF;} 
 .badge-idle{background:var(--surface2); color:var(--muted);} 
 
+/* Mobile tidy: ensure badges/chips wrap and don't overflow */
+@media (max-width:540px){
+  .item-card .badge{margin:6px 8px 6px 0; font-size:12px; padding:6px 9px}
+  .item-card .item-row{flex-direction:column; align-items:flex-start}
+  .item-card .item-row > div:first-child{width:100%}
+  .item-card .item-row > div:first-child > div{display:block}
+  .item-card .item-row .plate{display:inline-block; margin-bottom:8px}
+  .item-card .item-row .badge{flex-wrap:wrap}
+}
+
 .empty-state{text-align:center; padding:50px 20px; color:var(--muted);}
 .empty-state svg{width:36px; height:36px; margin-bottom:10px; opacity:0.5;}
+
+/* Search box styles */
+.search-box{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); padding:6px 8px; border-radius:10px; box-shadow:0 4px 12px rgba(2,6,23,0.03);}
+.search-input{border:0; outline:none; padding:8px 10px; min-width:180px; font-size:14px; background:transparent}
+.search-input:focus{box-shadow:none}
+.search-icon{width:18px; height:18px; opacity:0.7}
+.search-clear{background:transparent; border:0; font-size:18px; line-height:1; padding:4px 6px; cursor:pointer; color:var(--muted)}
+.search-clear.hidden{display:none}
+.filter-select{border:0; background:var(--surface2); padding:8px 10px; border-radius:8px; font-size:14px}
+.search-box:focus-within{transform:translateY(-1px); box-shadow:0 8px 24px rgba(2,6,23,0.06)}
+.search-suggest-list{position:relative}
+
 .empty-state p{font-size:13px; line-height:1.6;}
 
 /* Forms */
@@ -251,7 +279,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .sheet-handle{width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 16px;}
 .sheet-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
 .sheet-title{font-family:var(--font-display); font-weight:600; font-size:18px;}
-.icon-btn{width:30px; height:30px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+.icon-btn{width:40px; height:40px; border-radius:10px; background:linear-gradient(180deg, var(--surface), var(--surface2)); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(11,20,36,0.06); transition:transform .12s ease, box-shadow .12s ease, background .12s ease;}
+.icon-btn:hover{transform:translateY(-4px); box-shadow:0 18px 38px rgba(11,20,36,0.08);}
+.icon-btn:active{transform:translateY(-1px); box-shadow:0 8px 18px rgba(11,20,36,0.06);}
 
 /* Tabs (segmented) */
 .seg{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:3px; margin-bottom:16px;}
@@ -271,15 +301,21 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .nav-btn span{font-size:9.5px; font-weight:500; white-space:nowrap;}
 .nav-btn.active{color:var(--primary);}
 
-.fab{
-  position:fixed; bottom:88px; right:18px; z-index:15; width:52px; height:52px; border-radius:50%;
-  background:var(--primary); color:#FFFFFF; display:flex; align-items:center; justify-content:center;
-  border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.4);
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  padding:12px 18px; border-radius:12px; border:1px solid transparent;
+  background:var(--surface); font-size:15px; font-weight:600; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  box-shadow:0 6px 18px rgba(11,20,36,0.04);
 }
-.fab svg{width:24px; height:24px;}
+.btn:active{transform:translateY(1px); box-shadow:0 6px 12px rgba(11,20,36,0.03);}
+.btn-primary{background:linear-gradient(180deg,var(--primary),var(--primary-dim)); border-color:transparent; color:#fff; box-shadow:0 12px 30px rgba(37,99,235,0.18);}
+.btn-primary:hover{filter:brightness(1.03)}
+.btn-full{width:100%;}
+.btn-danger{background:linear-gradient(180deg,var(--red),var(--red-bg)); border-color:transparent; color:#fff}
+.btn-ghost{background:transparent; border:1px solid rgba(7,18,36,0.06);}
 
-.toast{
-  position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:60;
+/* make sheet close icon clearer */
+.sheet .icon-btn{width:40px; height:40px; border-radius:10px; background:var(--surface2); box-shadow:0 8px 20px rgba(11,20,36,0.06)}
   background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius);
   padding:10px 16px; font-size:13px; display:none; align-items:center; gap:8px;
 }
@@ -408,7 +444,62 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   <div class="section-head"><div class="section-title" style="font-size:14px;">Tagging &amp; dokumen Priority</div></div>
   <div class="card-list" id="dashDokumenList" style="margin-bottom:20px;"></div>
   <div class="section-head"><div class="section-title" style="font-size:14px;">Laporan abnormal terbaru</div></div>
-  <div class="card-list" id="dashReportsList"></div>
+  <div class="card-list" id="dashReportsList" style="margin-bottom:24px;"></div>
+
+  <div class="section-head"><div class="section-title" style="font-size:16px;">Evaluasi Kinerja</div></div>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-icon icon-uptime" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Fleet uptime</div>
+        <div class="metric-value green" id="mUptime">-</div>
+        <div class="metric-sub small" id="mUptimeSub"></div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon icon-cost" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 1v22"></path><path d="M17 5H7a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H7"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Cost per km</div>
+        <div class="metric-value" id="mCostPerKm">-</div>
+        <div class="metric-sub small" id="mCostPerKmSub"></div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon icon-mttr" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Rata-rata waktu perbaikan</div>
+        <div class="metric-value" id="mMttr">-</div>
+        <div class="metric-sub small">MTTR</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon icon-mtbf" aria-hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+      </div>
+      <div>
+        <div class="metric-label">Rata-rata jarak antar kerusakan</div>
+        <div class="metric-value" id="mMtbf">-</div>
+        <div class="metric-sub small">MTBF</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-top:4px;" class="eval-grid">
+    <div>
+      <div class="section-head"><div class="section-title" style="font-size:14px;">Tren biaya maintenance (6 bulan)</div></div>
+      <div class="card-list-plain" id="trendChartWrap" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px;"></div>
+    </div>
+    <div>
+      <div class="section-head"><div class="section-title" style="font-size:14px;">Top 5 kendaraan bermasalah</div></div>
+      <div id="topProblemList" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px 16px;"></div>
+    </div>
+  </div>
 </div>
 
 <!-- DOKUMEN / TAGGING MONITORING -->
@@ -421,12 +512,13 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   </div>
   <div class="seg" id="dokumenFilterSeg" style="overflow-x:auto;">
     <div class="seg-btn active" data-f="all" onclick="setDokumenFilter('all')">Semua</div>
-    <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">`</div>
+    <div class="seg-btn" data-f="tag" onclick="setDokumenFilter('tag')">Tagging PTFI</div>
     <div class="seg-btn" data-f="stnk" onclick="setDokumenFilter('stnk')">STNK</div>
     <div class="seg-btn" data-f="pajak" onclick="setDokumenFilter('pajak')">Pajak</div>
     <div class="seg-btn" data-f="keur" onclick="setDokumenFilter('keur')">KEUR</div>
     <div class="seg-btn" data-f="annual" onclick="setDokumenFilter('annual')" style="white-space:nowrap;">Annual</div>
     <div class="seg-btn" data-f="tera" onclick="setDokumenFilter('tera')" style="white-space:nowrap;">Tera Alat</div>
+    <div class="seg-btn" data-f="maintenance" onclick="setDokumenFilter('maintenance')" style="white-space:nowrap;">Servis Preventif</div>
   </div>
   <div class="card-list" id="dokumenList"></div>
 </div>
@@ -435,7 +527,15 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-armada">
   <div class="section-head">
     <div class="section-title">Armada</div>
-    <button id="addVehicleBtn" class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+          <input id="searchArmada" list="searchSuggestions" class="search-input" placeholder="Cari kendaraan (plat, nama, kode)" oninput="renderVehicles()">
+          <button class="search-clear hidden" id="clearSearchArmada" onclick="clearSearch('searchArmada')">✕</button>
+        </div>
+        <select id="filterVehicleType" class="filter-select" onchange="renderVehicles()"><option value="">Semua tipe</option></select>
+        <button id="addVehicleBtn" class="btn" onclick="openVehicleForm()">+ Kendaraan</button>
+      </div>
   </div>
   <div class="card-list" id="vehicleList"></div>
 </div>
@@ -444,7 +544,14 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-peralatan">
   <div class="section-head">
     <div class="section-title">Peralatan</div>
-    <button id="addPeralatanBtn" class="btn" onclick="openPeralatanForm()">+ Alat</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+          <input id="searchPeralatan" list="searchSuggestions" class="search-input" placeholder="Cari alat (nama, kode, seri)" oninput="renderPeralatan()">
+          <button class="search-clear hidden" id="clearSearchPeralatan" onclick="clearSearch('searchPeralatan')">✕</button>
+        </div>
+        <button id="addPeralatanBtn" class="btn" onclick="openPeralatanForm()">+ Alat</button>
+      </div>
   </div>
   <div class="card-list" id="peralatanList"></div>
 </div>
@@ -463,8 +570,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <!-- CATAT KM -->
 <div class="screen" id="screen-km">
   <div class="section-head">
-    <div class="section-title">Catat KM</div>
+    <div class="section-title">Catat KM &amp; BBM</div>
   </div>
+  <div style="margin-top:8px; margin-bottom:8px;"><input id="searchKM" class="search-input" placeholder="Cari KM (plat, catatan)" oninput="renderKmHistory()"></div>
   <div class="field">
     <label>Pilih kendaraan</label>
     <select id="kmVehicleSelect" onchange="renderKmHistory()"></select>
@@ -472,6 +580,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   <div class="field">
     <label>KM saat ini</label>
     <input type="number" id="kmInput" placeholder="cth. 45210" inputmode="numeric">
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Liter BBM (opsional)</label><input type="number" id="kmLiter" placeholder="cth. 40" inputmode="decimal"></div>
+    <div class="field"><label>Biaya BBM (opsional)</label><input type="number" id="kmBiayaBbm" placeholder="cth. 500000" inputmode="numeric"></div>
   </div>
   <div class="field">
     <label>Catatan (opsional)</label>
@@ -486,7 +598,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-servis">
   <div class="section-head">
     <div class="section-title">Riwayat servis</div>
-    <button id="addServiceBtn" class="btn" onclick="openServiceForm()">+ Servis</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="searchService" class="search-input" placeholder="Cari servis (plat, jenis, item)" oninput="renderServices()">
+      <button id="addServiceBtn" class="btn" onclick="openServiceForm()">+ Servis</button>
+    </div>
   </div>
   <div class="card-list" id="serviceList"></div>
 </div>
@@ -495,7 +610,10 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 <div class="screen" id="screen-laporan">
   <div class="section-head">
     <div class="section-title">Laporan abnormal</div>
-    <button id="addReportBtn" class="btn" onclick="openReportForm()">+ Laporan</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="searchReport" class="search-input" placeholder="Cari laporan (plat, judul, deskripsi)" oninput="renderReports()">
+      <button id="addReportBtn" class="btn" onclick="openReportForm()">+ Laporan</button>
+    </div>
   </div>
   <div class="seg" id="reportFilterSeg">
     <div class="seg-btn active" data-f="all" onclick="setReportFilter('all')">Semua</div>
@@ -546,6 +664,8 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 
 <div class="toast" id="toast"></div>
 
+<datalist id="searchSuggestions"></datalist>
+
 <script>
 /* ============================================================
    CONFIG — WAJIB DIISI SEBELUM DEPLOY
@@ -592,7 +712,7 @@ function toggleCompactView(){
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function fmtDate(d){ return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
-function todayStr(){ return new Date().toISOString().slice(0,10); }
+function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
 function safeLower(x){ return x == null ? '' : String(x).toLowerCase(); }
 
@@ -697,6 +817,49 @@ function setSyncStatus(state, label){
   }
 }
 
+function populateSearchUI(){
+  populateSearchSuggestions();
+  populateVehicleTypeFilter();
+  // toggle clear buttons
+  ['searchArmada','searchPeralatan','searchKM','searchService','searchReport'].forEach(id=>{
+    const el = document.getElementById(id);
+    const btn = document.getElementById('clear' + id.charAt(0).toUpperCase() + id.slice(1));
+    if(el && btn){ btn.classList.toggle('hidden', !el.value); }
+    if(el && !el._searchListener){
+      el.addEventListener('input', ()=>{
+        const b = document.getElementById('clear' + id.charAt(0).toUpperCase() + id.slice(1));
+        if(b) b.classList.toggle('hidden', !el.value);
+      });
+      el._searchListener = true;
+    }
+  });
+}
+
+function populateSearchSuggestions(){
+  const ds = document.getElementById('searchSuggestions'); if(!ds) return;
+  const vals = [];
+  DB.vehicles.forEach(v=>{ if(v.plat) vals.push(v.plat); if(v.equipmentName) vals.push(v.equipmentName); if(v.equipmentCode) vals.push(v.equipmentCode); });
+  DB.peralatan.forEach(p=>{ if(p.kodeAlat) vals.push(p.kodeAlat); if(p.namaAlat) vals.push(p.namaAlat); });
+  // unique
+  const uniq = Array.from(new Set(vals)).slice(0,200);
+  ds.innerHTML = uniq.map(s=>`<option value="${s}"></option>`).join('');
+}
+
+function populateVehicleTypeFilter(){
+  const sel = document.getElementById('filterVehicleType'); if(!sel) return;
+  const types = Array.from(new Set(DB.vehicles.map(v=> (v.jenis||v.model||'').trim()).filter(Boolean))).sort();
+  sel.innerHTML = `<option value="">Semua tipe</option>` + types.map(t=>`<option value="${t}">${t}</option>`).join('');
+}
+
+function clearSearch(id){
+  const el = document.getElementById(id); if(!el) return; el.value = ''; if(id==='searchArmada' || id==='searchPeralatan') document.getElementById('clear'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('hidden');
+  if(id==='searchArmada') renderVehicles();
+  if(id==='searchPeralatan') renderPeralatan();
+  if(id==='searchKM') renderKmHistory();
+  if(id==='searchService') renderServices();
+  if(id==='searchReport') renderReports();
+}
+
 async function syncFromSheet(){
   if(CONFIG.scriptUrl.startsWith("ISI_")){
     setSyncStatus('err', 'belum diatur');
@@ -729,19 +892,44 @@ async function syncFromSheet(){
 function normalizeRow(row){
   if('km' in row) row.km = row.km === '' ? null : Number(row.km);
   if('biaya' in row) row.biaya = row.biaya === '' ? 0 : Number(row.biaya);
+  if('liter' in row) row.liter = row.liter === '' ? 0 : Number(row.liter);
+  if('biayaBbm' in row) row.biayaBbm = row.biayaBbm === '' ? 0 : Number(row.biayaBbm);
+  if('downtimeJam' in row) row.downtimeJam = row.downtimeJam === '' ? 0 : Number(row.downtimeJam);
+  if('intervalKmServis' in row) row.intervalKmServis = row.intervalKmServis === '' ? null : Number(row.intervalKmServis);
+  if('intervalHariServis' in row) row.intervalHariServis = row.intervalHariServis === '' ? null : Number(row.intervalHariServis);
   // Normalize common date fields from backend (may contain full ISO timestamps)
   const dateFields = ['ptfiTagExpired','stnkExpired','pajakExpired','keurExpired','annualInspExpired','teraExpired','tanggal'];
   dateFields.forEach(f => {
     if(f in row && row[f]){
-      const d = new Date(row[f]);
-      if(!isNaN(d.getTime())){
-        row[f] = d.toISOString().slice(0,10); // YYYY-MM-DD
+      const val = row[f];
+      // If already in YYYY-MM-DD format, keep as-is (avoid re-parsing/timezone shifts)
+      if(typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)){
+        // keep existing format
       } else {
-        // if value is empty or unparseable, keep as-is (renderers handle empty)
+        // try to parse other timestamp formats and convert to local date components
+        const d = new Date(val);
+        if(!isNaN(d.getTime())){
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2,'0');
+          const dd = String(d.getDate()).padStart(2,'0');
+          row[f] = `${y}-${m}-${dd}`;
+        }
+        // if unparseable, leave as-is
       }
     }
   });
   return row;
+}
+
+// Helper: return YYYY-MM for a date-like string using local date parts
+function monthKey(dateStr){
+  if(!dateStr) return null;
+  if(typeof dateStr==='string' && /^\d{4}-\d{2}$/.test(dateStr)) return dateStr;
+  if(typeof dateStr==='string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr.slice(0,7);
+  const d = new Date(dateStr);
+  if(isNaN(d.getTime())) return null;
+  const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0');
+  return `${y}-${m}`;
 }
 
 // Local image mapping: map identifier (name / plate / code) -> image URL
@@ -758,8 +946,11 @@ const IMAGES_MAP = {
 };
 
 function applyImageMappings(){
-  if(!DB || !Array.isArray(DB.vehicles)) return;
-  Object.entries(IMAGES_MAP).forEach(([ident, url]) => setVehiclePhotoByIdentifier(ident, url));
+  if(!DB) return;
+  Object.entries(IMAGES_MAP).forEach(([ident, url]) => {
+    if(Array.isArray(DB.vehicles)) setVehiclePhotoByIdentifier(ident, url);
+    if(Array.isArray(DB.peralatan)) setPeralatanPhotoByIdentifier(ident, url);
+  });
 }
 
 function setVehiclePhotoByIdentifier(identifier, url){
@@ -770,7 +961,22 @@ function setVehiclePhotoByIdentifier(identifier, url){
     const plat = safeLower(v.plat);
     const code = safeLower(v.equipmentCode);
     if(name.includes(idLow) || plat.includes(idLow) || code.includes(idLow) || (v.id && v.id===identifier)){
-      v.photo = url;
+      // Do not overwrite a user-provided photo. Only set mapping if no photo present.
+      if(!v.photo || String(v.photo).trim()==='') v.photo = url;
+    }
+  });
+}
+
+function setPeralatanPhotoByIdentifier(identifier, url){
+  if(!identifier) return;
+  const idLow = String(identifier).toLowerCase();
+  DB.peralatan.forEach(p=>{
+    const name = safeLower(p.namaAlat);
+    const code = safeLower(p.kodeAlat);
+    const seri = safeLower(p.noSeri);
+    if(name.includes(idLow) || code.includes(idLow) || seri.includes(idLow) || (p.id && p.id===identifier)){
+      // Preserve any existing photo set by user; only apply mapping when empty
+      if(!p.photo || String(p.photo).trim()==='') p.photo = url;
     }
   });
 }
@@ -906,6 +1112,13 @@ function openVehicleForm(existing){
     <div class="field"><label>Annual Inspection Number</label><input id="fAnnualNo" value="${v.annualInspNumber||''}" placeholder="cth. AI-2026-014"></div>
     ${dateFieldHTML('fAnnualExp', 'Annual Inspection Expired Date', v.annualInspExpired)}
 
+    <div class="form-section-label">Jadwal Servis Preventif</div>
+    <div class="field-row">
+      <div class="field"><label>Interval servis (KM)</label><input id="fIntervalKm" type="number" value="${v.intervalKmServis||''}" placeholder="cth. 5000"></div>
+      <div class="field"><label>Interval servis (hari)</label><input id="fIntervalHari" type="number" value="${v.intervalHariServis||''}" placeholder="cth. 90"></div>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin:-6px 0 14px;">Dihitung otomatis dari servis terakhir tercatat + interval ini. Isi salah satu atau keduanya.</p>
+
     <div class="form-section-label">Gambar</div>
     <div class="field"><label>Image URL (opsional)</label><input id="fPhoto" value="${v.photo||v.image||v.img||''}" placeholder="https://..."></div>
 
@@ -1001,6 +1214,8 @@ function saveVehicle(id){
     inspectionNumber: document.getElementById('fInspeksi').value.trim(),
     annualInspNumber: document.getElementById('fAnnualNo').value.trim(),
     annualInspExpired: getDateFieldValue('fAnnualExp'),
+    intervalKmServis: parseInt(document.getElementById('fIntervalKm').value,10) || null,
+    intervalHariServis: parseInt(document.getElementById('fIntervalHari').value,10) || null,
     photo: document.getElementById('fPhoto') ? document.getElementById('fPhoto').value.trim() : ''
   };
   if(id){
@@ -1039,6 +1254,7 @@ function openPeralatanForm(existing){
       <div class="field"><label>Kapasitas</label><input id="pKapasitas" value="${p.kapasitas||''}" placeholder="cth. 500 kg / 10 ton"></div>
       <div class="field"><label>Lokasi/area</label><input id="pLokasi" value="${p.lokasi||''}" placeholder="cth. Smelter A"></div>
     </div>
+    <div class="field"><label>Image URL (opsional)</label><input id="pPhoto" value="${p.photo||p.image||p.img||''}" placeholder="https://... (opsional)"></div>
     <div class="field"><label>Status</label>
       <select id="pStatus">
         <option value="aktif" ${p.status==='aktif'?'selected':''}>Aktif</option>
@@ -1080,6 +1296,8 @@ function openPeralatanDetail(p){
     </div>
     <div class="field"><label>Status</label><div class="readonly-value">${val(p.status)}</div></div>
 
+      <div class="field"><label>Gambar</label><div class="readonly-value">${p.photo?`<img src="${p.photo}" class="veh-thumb" style="max-width:180px">`:'-'}</div></div>
+
     <div class="form-section-label">Tera / Uji Riksa</div>
     <div class="field"><label>Nomor Sertifikat</label><div class="readonly-value">${val(p.teraNumber)}</div></div>
     <div class="field"><label>Tanggal Expired</label><div class="readonly-value">${val(p.teraExpired)} ${p.teraExpired? expChip('Tera', p.teraExpired):''}</div></div>
@@ -1105,6 +1323,7 @@ function savePeralatan(id){
     noSeri: document.getElementById('pSerial').value.trim(),
     kapasitas: document.getElementById('pKapasitas').value.trim(),
     lokasi: document.getElementById('pLokasi').value.trim(),
+    photo: document.getElementById('pPhoto')? document.getElementById('pPhoto').value.trim() : '',
     status: document.getElementById('pStatus').value,
     teraNumber: document.getElementById('pTeraNo').value.trim(),
     teraExpired: getDateFieldValue('pTeraExp')
@@ -1163,6 +1382,7 @@ function performDeleteVehicle(id){
 
 function renderPeralatan(){
   const list = document.getElementById('peralatanList');
+  const q = (document.getElementById('searchPeralatan') && document.getElementById('searchPeralatan').value || '').toLowerCase().trim();
   if(!list) return;
   if(!DB.peralatan.length){
     list.innerHTML = `<div class="empty-state">
@@ -1171,12 +1391,17 @@ function renderPeralatan(){
     </div>`;
     return;
   }
+  const items = q ? DB.peralatan.filter(p=>{
+    const hay = ((p.namaAlat||'') + ' ' + (p.kodeAlat||'') + ' ' + (p.noSeri||'') + ' ' + (p.merk||'')).toLowerCase();
+    return hay.includes(q);
+  }) : DB.peralatan;
+
   if(compactView){
     list.innerHTML = `
       <table class="compact-table">
         <thead><tr><th>Kode / Nama Alat</th><th>Status</th><th>Tera</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
         <tbody>
-          ${DB.peralatan.map(p=>{
+          ${items.map(p=>{
             const teraDays = daysUntil(p.teraExpired);
             const teraText = teraDays===null?'-':(teraDays<=0?`Lewat ${Math.abs(teraDays)} hari`:`${teraDays} hari`);
             const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
@@ -1193,7 +1418,7 @@ function renderPeralatan(){
         </tbody>
       </table>`;
   } else {
-    list.innerHTML = DB.peralatan.map(p=>{
+    list.innerHTML = items.map(p=>{
       const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
       const teraDays = daysUntil(p.teraExpired);
       let teraChip = '';
@@ -1204,19 +1429,22 @@ function renderPeralatan(){
       }
       const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
       return `<div class="item-card" onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
-        <div class="item-row">
-          <div>
-            <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat}</div>
-            <div class="item-row" style="gap:8px;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
-            <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+          <div class="item-row">
+            <div style="display:flex; gap:12px; align-items:center;">
+              ${p.photo ? `<img class="veh-thumb" src="${p.photo}" alt="${p.namaAlat}">` : `<div style="width:64px; height:44px; border-radius:8px; background:var(--surface2); border:1px solid rgba(7,18,36,0.04)"></div>`}
+              <div>
+                <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat}</div>
+                <div class="item-row" style="gap:8px; align-items:center;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
+                <div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="item-sub">${p.lokasi||''}</div>
+              <div class="item-sub">${p.noSeri||''}</div>
+            </div>
           </div>
-          <div style="text-align:right;">
-            <div class="item-sub">${p.lokasi||''}</div>
-            <div class="item-sub">${p.noSeri||''}</div>
-          </div>
-        </div>
-        ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
-      </div>`;
+          ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
+        </div>`;
     }).join('');
   }
 }
@@ -1268,6 +1496,33 @@ function getPrimaryDoc(v){
   return rest.length ? rest[0] : null;
 }
 
+/* Jadwal servis preventif — dihitung dari servis terakhir tercatat
+   + interval (KM dan/atau hari) yang diisi di form kendaraan.
+   Mengembalikan null kalau interval belum diisi atau belum pernah servis. */
+function getMaintenanceDue(v){
+  if(!v.intervalKmServis && !v.intervalHariServis) return null;
+  const vehicleServices = DB.services.filter(s=>s.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const lastService = vehicleServices[0];
+  if(!lastService) return null;
+
+  let dueByDate = null, dueByKm = null;
+  if(v.intervalHariServis){
+    const d = new Date(lastService.tanggal + 'T00:00:00');
+    d.setDate(d.getDate() + v.intervalHariServis);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    dueByDate = { date: dateStr, days: daysUntil(dateStr) };
+  }
+  if(v.intervalKmServis && lastService.km){
+    const vehicleKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
+    if(vehicleKm){
+      const kmRemaining = (lastService.km + v.intervalKmServis) - vehicleKm.km;
+      dueByKm = { kmRemaining };
+    }
+  }
+  if(!dueByDate && !dueByKm) return null;
+  return { key: 'maintenance', label: 'Servis Preventif', date: dueByDate?dueByDate.date:null, days: dueByDate?dueByDate.days:null, kmRemaining: dueByKm?dueByKm.kmRemaining:null };
+}
+
 function vehicleIcon(v){
   if(!v) return '';
   // if vehicle has a photo, show thumbnail
@@ -1305,6 +1560,8 @@ function badgeIconHTML(key){
       return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>`;
     case 'tera':
       return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21h16M6 7h12M7 7v14"></path><path d="M17 7v10"></path></svg>`;
+    case 'maintenance':
+      return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>`;
     case 'aktif':
     case 'ok':
       return `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6L9 17l-5-5"></path></svg>`;
@@ -1333,6 +1590,7 @@ function primaryDocChip(v){
 
 function renderVehicles(){
   const list = document.getElementById('vehicleList');
+  const q = (document.getElementById('searchArmada') && document.getElementById('searchArmada').value || '').toLowerCase().trim();
   if(!DB.vehicles.length){
     list.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17h13v-5H3v5Zm13-5 3-4h3l2 4"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>
@@ -1340,13 +1598,25 @@ function renderVehicles(){
     </div>`;
     return;
   }
+  const vehicles = q ? DB.vehicles.filter(v=>{
+    const hay = ((v.plat||'') + ' ' + (v.equipmentName||'') + ' ' + (v.equipmentCode||'') + ' ' + (v.merk||'') ).toLowerCase();
+    return hay.includes(q);
+  }) : DB.vehicles;
+  // apply type/model filter
+  const typeFilter = (document.getElementById('filterVehicleType') && document.getElementById('filterVehicleType').value) || '';
+  let filteredVehicles = vehicles;
+  if(typeFilter){
+    const tf = typeFilter.toLowerCase();
+    filteredVehicles = vehicles.filter(v=> (String(v.jenis||'') + ' ' + String(v.model||'')).toLowerCase().includes(tf));
+  }
+
   if(compactView){
     // render table
     list.innerHTML = `
       <table class="compact-table">
         <thead><tr><th>Plat</th><th>Nama / Kode</th><th>Status</th><th>Primary Doc</th><th>Days</th><th style="width:160px">Aksi</th></tr></thead>
         <tbody>
-          ${DB.vehicles.map(v=>{
+          ${filteredVehicles.map(v=>{
             const doc = getPrimaryDoc(v);
             const days = doc ? doc.days : '';
             const docLabel = doc ? doc.label : '-';
@@ -1365,7 +1635,7 @@ function renderVehicles(){
         </tbody>
       </table>`;
   } else {
-    list.innerHTML = DB.vehicles.map(v=>{
+    list.innerHTML = filteredVehicles.map(v=>{
       const badge = v.status==='aktif' ? 'badge-ok' : v.status==='perbaikan' ? 'badge-warn' : 'badge-idle';
       const lastKm = DB.kmLogs.filter(k=>k.vehicleId===v.id).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))[0];
       const chip = primaryDocChip(v);
@@ -1388,7 +1658,7 @@ function renderVehicles(){
         </div>
         ${chip ? `<div style="margin-top:10px;">${chip}</div>` : ''}
       </div>`;
-    }).join('');
+      }).join('');
   }
 }
 
@@ -1409,21 +1679,62 @@ function submitKm(){
   const km = parseInt(document.getElementById('kmInput').value, 10);
   if(!vehicleId){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
   if(!km || km < 0){ showToast('Isi angka KM yang valid', 'err'); return; }
+  const liter = parseFloat(document.getElementById('kmLiter').value) || 0;
+  const biayaBbm = parseInt(document.getElementById('kmBiayaBbm').value, 10) || 0;
   DB.kmLogs.push({
     id: uid(), vehicleId, km, tanggal: todayStr(),
     catatan: document.getElementById('kmNote').value.trim(),
-    dicatatOleh: currentUserName
+    dicatatOleh: currentUserName,
+    liter, biayaBbm
   });
   document.getElementById('kmInput').value = '';
+  document.getElementById('kmLiter').value = '';
+  document.getElementById('kmBiayaBbm').value = '';
   document.getElementById('kmNote').value = '';
   renderAll(); saveToSheet();
   showToast('KM tersimpan', 'ok');
 }
 
+function openKmForm(existing){
+  const ex = existing || null;
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
+  if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  const selOptions = DB.vehicles.map(v=>`<option value="${v.id}" ${ex && v.id===ex.vehicleId ? 'selected' : ''}>${v.plat} — ${v.equipmentName||''}</option>`).join('');
+  openSheet(`
+    <div class="sheet-head"><div class="sheet-title">${ex? 'Ubah KM' : 'Catat KM'}</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="field"><label>Kendaraan</label><select id="kmVehicleSelectForm">${selOptions}</select></div>
+    <div class="field-row"><div class="field"><label>Tanggal</label><input id="kmTanggal" type="date" value="${ex? ex.tanggal : todayStr()}"></div><div class="field"><label>KM</label><input id="kmValue" type="number" value="${ex? ex.km||'' : ''}"></div></div>
+    <div class="field-row"><div class="field"><label>Liter BBM</label><input id="kmLiterForm" type="number" value="${ex? ex.liter||'' : ''}"></div><div class="field"><label>Biaya BBM</label><input id="kmBiayaBbmForm" type="number" value="${ex? ex.biayaBbm||'' : ''}"></div></div>
+    <div class="field"><label>Catatan</label><input id="kmNoteForm" value="${ex? ex.catatan||'' : ''}"></div>
+    <div style="display:flex; gap:8px;"><button class="btn btn-primary btn-full" onclick="saveKm('${ex? ex.id : ''}')">Simpan</button>${ex? `<button class="btn btn-danger" onclick="deleteKm('${ex.id}')">Hapus</button>` : ''}</div>
+  `);
+}
+
+function saveKm(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
+  const vehicleId = document.getElementById('kmVehicleSelectForm').value;
+  const km = parseInt(document.getElementById('kmValue').value,10);
+  if(!vehicleId || (!km && km!==0)){ showToast('Isi KM dengan angka valid', 'err'); return; }
+  const payload = { vehicleId, km, tanggal: document.getElementById('kmTanggal').value || todayStr(), catatan: document.getElementById('kmNoteForm').value.trim(), dicatatOleh: currentUserName, liter: parseFloat(document.getElementById('kmLiterForm').value)||0, biayaBbm: parseInt(document.getElementById('kmBiayaBbmForm').value,10)||0 };
+  if(id){ const e = DB.kmLogs.find(x=>x.id===id); if(e) Object.assign(e, payload); }
+  else { DB.kmLogs.push({ id: uid(), ...payload }); }
+  closeSheet(); renderAll(); saveToSheet(); showToast('KM disimpan', 'ok');
+}
+
+function openKmAction(id){ const k = DB.kmLogs.find(x=>x.id===id); if(!k) return; if(isAdmin) openKmForm(k); else { openSheet(`<div class="sheet-head"><div class="sheet-title">Detail KM</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div><div class="field-row"><div class="field"><label>KM</label><div class="readonly-value">${k.km}</div></div><div class="field"><label>Tanggal</label><div class="readonly-value">${k.tanggal}</div></div></div><div class="field"><label>Catatan</label><div class="readonly-value">${k.catatan||'-'}</div></div>`); } }
+
+function deleteKm(id){ if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; } openSheet(`<div class="sheet-head"><div class="sheet-title">Konfirmasi hapus KM</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div><p>Hapus catatan KM ini?</p><div style="display:flex; gap:8px;"><button class="btn" onclick="closeSheet()">Batal</button><button class="btn btn-danger" onclick="performDeleteKm('${id}')">Hapus</button></div>`); }
+
+function performDeleteKm(id){ if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; } DB.kmLogs = DB.kmLogs.filter(x=>x.id!==id); closeSheet(); saveToSheet(); renderAll(); showToast('Catatan KM dihapus', 'ok'); }
+
 function renderKmHistory(){
   const vehicleId = document.getElementById('kmVehicleSelect').value;
   const list = document.getElementById('kmHistoryList');
-  const logs = DB.kmLogs.filter(k=>k.vehicleId===vehicleId).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const q = (document.getElementById('searchKM') && document.getElementById('searchKM').value || '').toLowerCase().trim();
+  let logs = DB.kmLogs.filter(k=>k.vehicleId===vehicleId).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(q){
+    logs = logs.filter(k=>((k.catatan||'') + ' ' + (k.dicatatOleh||'')).toLowerCase().includes(q) || String(k.km||'').includes(q) || (DB.vehicles.find(v=>v.id===k.vehicleId)||{}).plat.toLowerCase().includes(q));
+  }
   const v = DB.vehicles.find(x=>x.id===vehicleId);
   // update KM screen title to include equipment name like reports
   const kmTitleEl = document.querySelector('#screen-km .section-title');
@@ -1433,7 +1744,7 @@ function renderKmHistory(){
     return;
   }
   list.innerHTML = logs.map(k=>`
-    <div class="item-card" style="cursor:default;">
+    <div class="item-card" onclick="openKmAction('${k.id}')" style="cursor:pointer;">
       <div class="item-row">
         <div>
           <div class="item-title" style="font-family:var(--font-mono);">${v? (v.equipmentName + ' · '): ''}${k.km.toLocaleString('id-ID')} km</div>
@@ -1444,6 +1755,7 @@ function renderKmHistory(){
           <div class="item-sub">${k.dicatatOleh||''}</div>
         </div>
       </div>
+      ${isAdmin? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openKmForm(${JSON.stringify(k).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteKm('${k.id}')">Hapus</button></div>` : ''}
     </div>`).join('');
 }
 
@@ -1451,28 +1763,35 @@ function renderKmHistory(){
    SERVICE HISTORY
    ============================================================ */
 function openServiceForm(){
+  // open form for new service or editing if an object is passed
+  const existing = arguments[0] || null;
   if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  const selOptions = DB.vehicles.map(v=>`<option value="${v.id}" ${existing && v.id===existing.vehicleId ? 'selected' : ''}>${v.plat} — ${v.equipmentName||''}</option>`).join('');
   openSheet(`
     <div class="sheet-head">
-      <div class="sheet-title">Catat servis</div>
+      <div class="sheet-title">${existing? 'Ubah servis' : 'Catat servis'}</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
     <div class="field"><label>Kendaraan</label>
-      <select id="sVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat} — ${v.equipmentName||''}</option>`).join('')}</select>
+      <select id="sVehicle">${selOptions}</select>
     </div>
     <div class="field-row">
-      <div class="field"><label>Tanggal</label><input id="sTanggal" type="date" value="${todayStr()}"></div>
-      <div class="field"><label>KM saat servis</label><input id="sKm" type="number" placeholder="cth. 45210"></div>
+      <div class="field"><label>Tanggal</label><input id="sTanggal" type="date" value="${existing? existing.tanggal : todayStr()}"></div>
+      <div class="field"><label>KM saat servis</label><input id="sKm" type="number" placeholder="cth. 45210" value="${existing && existing.km? existing.km : ''}"></div>
     </div>
-    <div class="field"><label>Jenis servis</label><input id="sJenis" placeholder="cth. Servis berkala / Ganti oli / Perbaikan rem"></div>
-    <div class="field"><label>Item / suku cadang diganti</label><textarea id="sItem" placeholder="cth. Oli mesin, filter oli, filter udara"></textarea>
+    <div class="field"><label>Jenis servis</label><input id="sJenis" placeholder="cth. Servis berkala / Ganti oli / Perbaikan rem" value="${existing? existing.jenis||'' : ''}"></div>
+    <div class="field"><label>Item / suku cadang diganti</label><textarea id="sItem" placeholder="cth. Oli mesin, filter oli, filter udara">${existing? existing.item||'' : ''}</textarea>
     </div>
     <div class="field-row">
-      <div class="field"><label>Bengkel</label><input id="sBengkel" placeholder="cth. Auto2000 Manyar"></div>
-      <div class="field"><label>Biaya (Rp)</label><input id="sBiaya" type="number" placeholder="0"></div>
+      <div class="field"><label>Bengkel</label><input id="sBengkel" placeholder="cth. Auto2000 Manyar" value="${existing? existing.bengkel||'' : ''}"></div>
+      <div class="field"><label>Biaya (Rp)</label><input id="sBiaya" type="number" placeholder="0" value="${existing? existing.biaya||0 : 0}"></div>
     </div>
-    <button class="btn btn-primary btn-full" onclick="saveService()">Simpan servis</button>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary btn-full" onclick="saveService('${existing? existing.id : ''}')">Simpan servis</button>
+      ${existing? `<button class="btn" onclick="openServiceDetail(${existing? JSON.stringify(existing).replace(/'/g,"&apos;") : ''})">Lihat</button>` : ''}
+    </div>
+    ${existing? `<div style="margin-top:8px;"><button class="btn btn-danger btn-full" onclick="deleteService('${existing.id}')">Hapus servis</button></div>` : ''}
   `);
 
   // update sheet title to include selected equipment name and attach listener
@@ -1480,40 +1799,78 @@ function openServiceForm(){
     const sel = document.getElementById('sVehicle'); if(!sel) return;
     const vv = DB.vehicles.find(x=>x.id===sel.value);
     const titleEl = document.querySelector('#sheetContent .sheet-title');
-    if(titleEl) titleEl.textContent = vv ? `Catat servis — ${vv.equipmentName} (${vv.plat||''})` : 'Catat servis';
+    if(titleEl) titleEl.textContent = vv ? `${existing? 'Ubah servis' : 'Catat servis'} — ${vv.equipmentName} (${vv.plat||''})` : (existing? 'Ubah servis' : 'Catat servis');
   };
   setServiceSheetTitle();
   const selEl = document.getElementById('sVehicle'); if(selEl) selEl.addEventListener('change', setServiceSheetTitle);
 }
 
-function saveService(){
+function saveService(id){
   if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const vehicleId = document.getElementById('sVehicle').value;
   const jenis = document.getElementById('sJenis').value.trim();
   if(!jenis){ showToast('Isi jenis servis', 'err'); return; }
-  DB.services.push({
-    id: uid(), vehicleId,
+  const payload = {
+    vehicleId,
     tanggal: document.getElementById('sTanggal').value || todayStr(),
     km: parseInt(document.getElementById('sKm').value,10) || null,
     jenis, item: document.getElementById('sItem').value.trim(),
     bengkel: document.getElementById('sBengkel').value.trim(),
     biaya: parseInt(document.getElementById('sBiaya').value,10) || 0,
     dicatatOleh: currentUserName
-  });
+  };
+  if(id){
+    const s = DB.services.find(x=>x.id===id);
+    if(s) Object.assign(s, payload);
+  } else {
+    DB.services.push({ id: uid(), ...payload });
+  }
   closeSheet(); renderAll(); saveToSheet();
   showToast('Servis tersimpan', 'ok');
 }
 
+function openServiceAction(id){
+  const s = DB.services.find(x=>x.id===id);
+  if(!s) return;
+  if(isAdmin) openServiceForm(s); else {
+    openSheet('<div class="sheet-head"><div class="sheet-title">Detail Servis</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>'+
+      `<div class="field"><label>Kendaraan</label><div class="readonly-value">${(DB.vehicles.find(v=>v.id===s.vehicleId)||{}).plat||''}</div></div>`+
+      `<div class="field-row"><div class="field"><label>Tanggal</label><div class="readonly-value">${s.tanggal}</div></div><div class="field"><label>KM</label><div class="readonly-value">${s.km||'-'}</div></div></div>`+
+      `<div class="field"><label>Jenis</label><div class="readonly-value">${s.jenis}</div></div><div class="field"><label>Item</label><div class="readonly-value">${s.item||'-'}</div></div>`+
+      `<div class="field-row"><div class="field"><label>Bengkel</label><div class="readonly-value">${s.bengkel||''}</div></div><div class="field"><label>Biaya</label><div class="readonly-value">${s.biaya?('Rp '+s.biaya.toLocaleString('id-ID')):'-'}</div></div></div>`
+    );
+  }
+}
+
+function deleteService(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  openSheet(`<div class="sheet-head"><div class="sheet-title">Konfirmasi hapus servis</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div><p>Hapus catatan servis ini?</p><div style="display:flex; gap:8px;"><button class="btn" onclick="closeSheet()">Batal</button><button class="btn btn-danger" onclick="performDeleteService('${id}')">Hapus</button></div>`);
+}
+
+function performDeleteService(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  DB.services = DB.services.filter(s=>s.id!==id);
+  closeSheet(); saveToSheet(); renderAll(); showToast('Servis dihapus', 'ok');
+}
+
 function renderServices(){
   const list = document.getElementById('serviceList');
-  const items = [...DB.services].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const q = (document.getElementById('searchService') && document.getElementById('searchService').value || '').toLowerCase().trim();
+  let items = [...DB.services].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(q){
+    items = items.filter(s=>{
+      const v = DB.vehicles.find(x=>x.id===s.vehicleId) || {};
+      const hay = ((v.plat||'') + ' ' + (v.equipmentName||'') + ' ' + (s.jenis||'') + ' ' + (s.item||'') + ' ' + (s.bengkel||'')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
   if(!items.length){
     list.innerHTML = `<div class="empty-state"><p>Belum ada riwayat servis.</p></div>`;
     return;
   }
   list.innerHTML = items.map(s=>{
     const v = DB.vehicles.find(x=>x.id===s.vehicleId);
-    return `<div class="item-card" style="cursor:default;">
+    return `<div class="item-card" onclick='openServiceAction("${s.id}")' style="cursor:pointer;">
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
           ${vehicleIcon(v)}
@@ -1528,6 +1885,7 @@ function renderServices(){
           ${s.biaya?`<div class="item-sub" style="color:var(--text);">Rp ${s.biaya.toLocaleString('id-ID')}</div>`:''}
         </div>
       </div>
+      ${isAdmin? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openServiceForm(${JSON.stringify(s).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteService('${s.id}')">Hapus</button></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -1535,48 +1893,80 @@ function renderServices(){
 /* ============================================================
    ABNORMAL REPORTS
    ============================================================ */
-function openReportForm(){
+function openReportForm(existing){
+  const ex = existing || null;
   if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  const selOptions = DB.vehicles.map(v=>`<option value="${v.id}" ${ex && v.id===ex.vehicleId ? 'selected' : ''}>${v.plat}</option>`).join('');
   openSheet(`
     <div class="sheet-head">
-      <div class="sheet-title">Laporan abnormal</div>
+      <div class="sheet-title">${ex? 'Ubah Laporan' : 'Laporan abnormal'}</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
     <div class="field"><label>Kendaraan</label>
-      <select id="rVehicle">${DB.vehicles.map(v=>`<option value="${v.id}">${v.plat}</option>`).join('')}</select>
+      <select id="rVehicle">${selOptions}</select>
     </div>
     <div class="field"><label>Tingkat</label>
       <select id="rTingkat">
-        <option value="ringan">Ringan</option>
-        <option value="sedang">Sedang</option>
-        <option value="berat">Berat</option>
+        <option value="ringan" ${ex && ex.tingkat==='ringan' ? 'selected' : ''}>Ringan</option>
+        <option value="sedang" ${ex && ex.tingkat==='sedang' ? 'selected' : ''}>Sedang</option>
+        <option value="berat" ${ex && ex.tingkat==='berat' ? 'selected' : ''}>Berat</option>
       </select>
     </div>
-    <div class="field"><label>Deskripsi masalah</label><textarea id="rDesk" placeholder="cth. Getar mesin saat idle, suara kasar dari roda depan kiri"></textarea></div>
-    <div class="field"><label>Link foto (opsional)</label><input id="rFoto" placeholder="Tempel link Google Drive foto"></div>
-    <button class="btn btn-primary btn-full" onclick="saveReport()">Kirim laporan</button>
+    <div class="field"><label>Deskripsi masalah</label><textarea id="rDesk" placeholder="cth. Getar mesin saat idle, suara kasar dari roda depan kiri">${ex? ex.deskripsi||'' : ''}</textarea></div>
+    <div class="field"><label>Link foto (opsional)</label><input id="rFoto" placeholder="Tempel link Google Drive foto" value="${ex? ex.fotoLink||'' : ''}"></div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary btn-full" onclick="saveReport('${ex? ex.id : ''}')">${ex? 'Simpan perubahan' : 'Kirim laporan'}</button>
+      ${ex? `<button class="btn" onclick="openReportDetail('${ex.id}')">Lihat</button>` : ''}
+    </div>
+    ${ex? `<div style="margin-top:8px;"><button class="btn btn-danger btn-full" onclick="deleteReport('${ex.id}')">Hapus laporan</button></div>` : ''}
   `);
 }
 
-function saveReport(){
+function saveReport(id){
   if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const desk = document.getElementById('rDesk').value.trim();
   if(!desk){ showToast('Isi deskripsi masalah', 'err'); return; }
-  DB.reports.push({
-    id: uid(), vehicleId: document.getElementById('rVehicle').value,
+  const payload = {
+    vehicleId: document.getElementById('rVehicle').value,
     tingkat: document.getElementById('rTingkat').value,
-    deskripsi: desk, fotoLink: document.getElementById('rFoto').value.trim(),
-    status: 'open', tanggal: todayStr(), dilaporkanOleh: currentUserName
-  });
+    deskripsi: desk,
+    fotoLink: document.getElementById('rFoto').value.trim(),
+    dilaporkanOleh: currentUserName,
+    tanggal: todayStr(),
+    status: 'open'
+  };
+  if(id){
+    const r = DB.reports.find(x=>x.id===id);
+    if(r) Object.assign(r, payload);
+  } else {
+    DB.reports.push({ id: uid(), downtimeJam: 0, ...payload });
+  }
   closeSheet(); renderAll(); saveToSheet();
-  showToast('Laporan terkirim', 'ok');
+  showToast('Laporan tersimpan', 'ok');
+}
+
+function deleteReport(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  openSheet(`<div class="sheet-head"><div class="sheet-title">Konfirmasi hapus laporan</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div><p>Hapus laporan ini?</p><div style="display:flex; gap:8px;"><button class="btn" onclick="closeSheet()">Batal</button><button class="btn btn-danger" onclick="performDeleteReport('${id}')">Hapus</button></div>`);
+}
+
+function performDeleteReport(id){
+  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  DB.reports = DB.reports.filter(r=>r.id!==id);
+  closeSheet(); saveToSheet(); renderAll(); showToast('Laporan dihapus', 'ok');
 }
 
 function toggleReportStatus(id){
   if(!isAdmin){ showToast('Hanya admin yang dapat mengubah status laporan', 'err'); return; }
   const r = DB.reports.find(x=>x.id===id);
-  r.status = r.status==='open' ? 'selesai' : 'open';
+  if(r.status==='open'){
+    const jamEl = document.getElementById('rCloseDowntime');
+    r.downtimeJam = jamEl ? (Number(jamEl.value) || 0) : (r.downtimeJam||0);
+    r.status = 'selesai';
+  } else {
+    r.status = 'open';
+  }
   closeSheet(); renderAll(); saveToSheet();
 }
 
@@ -1591,7 +1981,12 @@ function openReportDetail(id){
     <p style="font-size:13px; color:var(--muted); margin-bottom:4px;">Dilaporkan ${fmtDate(r.tanggal)} oleh ${r.dilaporkanOleh}</p>
     <p style="font-size:14px; line-height:1.6; margin:10px 0;">${r.deskripsi}</p>
     ${r.fotoLink ? `<a href="${r.fotoLink}" target="_blank" style="font-size:13px; color:var(--blue);">Lihat foto →</a>` : ''}
-    <button class="btn btn-full" style="margin-top:16px;" onclick="toggleReportStatus('${r.id}')">
+    ${r.status==='open' ? `
+      <div class="field" style="margin-top:16px;"><label>Durasi downtime (jam) — diisi saat ditutup</label><input id="rCloseDowntime" type="number" min="0" value="${r.downtimeJam||''}" placeholder="cth. 6"></div>
+    ` : `
+      <p style="font-size:12px; color:var(--muted); margin-top:14px;">Downtime tercatat: ${r.downtimeJam||0} jam</p>
+    `}
+    <button class="btn btn-full" style="margin-top:8px;" onclick="toggleReportStatus('${r.id}')">
       Tandai sebagai ${r.status==='open'?'selesai':'terbuka lagi'}
     </button>
   `);
@@ -1607,19 +2002,27 @@ function renderReports(){
   const list = document.getElementById('reportList');
   let items = [...DB.reports].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
   if(reportFilter!=='all') items = items.filter(r=>r.status===reportFilter);
+  const q = (document.getElementById('searchReport') && document.getElementById('searchReport').value || '').toLowerCase().trim();
+  if(q){
+    items = items.filter(r=>{
+      const v = DB.vehicles.find(x=>x.id===r.vehicleId) || {};
+      const hay = ((v.plat||'') + ' ' + (r.deskripsi||'') + ' ' + (r.tingkat||'')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
   if(!items.length){
     list.innerHTML = `<div class="empty-state"><p>Tidak ada laporan.</p></div>`;
     return;
   }
   list.innerHTML = items.map(r=>{
-    const v = DB.vehicles.find(x=>x.id===r.vehicleId);
+    const v = DB.vehicles.find(x=>x.id===r.vehicleId) || {};
     const badge = r.status==='open' ? 'badge-warn' : 'badge-ok';
-    return `<div class="item-card" onclick="openReportDetail('${r.id}')">
+    return `<div class="item-card" onclick="openReportDetail('${r.id}')" style="cursor:pointer;">
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
           ${vehicleIcon(v)}
           <div>
-            <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v?v.plat:'?'}</span><span class="item-title">${v? v.equipmentName : ''}</span><span class="badge ${badge}">${r.status}</span></div>
+            <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v.plat||'?'}</span><span class="item-title">${v.equipmentName||''}</span><span class="badge ${badge}">${r.status}</span></div>
             <div class="item-sub" style="margin-top:6px; color:var(--text);">${r.deskripsi.length>70?r.deskripsi.slice(0,70)+'…':r.deskripsi}</div>
           </div>
         </div>
@@ -1628,6 +2031,7 @@ function renderReports(){
           <div class="item-sub" style="text-transform:capitalize;">${r.tingkat}</div>
         </div>
       </div>
+      ${isAdmin? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openReportForm(${JSON.stringify(r).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteReport('${r.id}')">Hapus</button></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -1720,11 +2124,137 @@ function renderDashboard(){
   }).join('');
 }
 
+/* Evaluasi kinerja: Uptime, Cost/KM, MTTR, MTBF, tren biaya, top 5 bermasalah */
+function renderEvalKpis(){
+  const refDate = new Date(appRefDateStr + 'T00:00:00');
+  const monthPrefix = appRefDateStr.slice(0,7);
+
+  const activeCount = DB.vehicles.filter(v=>v.status==='aktif').length;
+  const daysElapsed = refDate.getDate();
+  const totalHoursAvailable = activeCount * daysElapsed * 24;
+  const downtimeThisMonth = DB.reports
+    .filter(r=> monthKey(r.tanggal) === monthPrefix )
+    .reduce((sum,r)=>sum+(r.downtimeJam||0), 0);
+  const uptimeEl = document.getElementById('mUptime');
+  const uptimeSubEl = document.getElementById('mUptimeSub');
+  if(totalHoursAvailable>0){
+    const uptimePct = Math.max(0, Math.min(100, 100 - (downtimeThisMonth/totalHoursAvailable)*100));
+    uptimeEl.textContent = uptimePct.toFixed(1) + '%';
+    uptimeSubEl.textContent = `${downtimeThisMonth}j downtime bulan ini`;
+  } else {
+    uptimeEl.textContent = '-'; uptimeSubEl.textContent = 'Data belum cukup';
+  }
+
+  const serviceCostThisMonth = DB.services.filter(s=> monthKey(s.tanggal) === monthPrefix ).reduce((sum,s)=>sum+(s.biaya||0),0);
+  const fuelCostThisMonth = DB.kmLogs.filter(k=> monthKey(k.tanggal) === monthPrefix ).reduce((sum,k)=>sum+(k.biayaBbm||0),0);
+  const totalCostThisMonth = serviceCostThisMonth + fuelCostThisMonth;
+  let totalKmThisMonth = 0;
+  DB.vehicles.forEach(v=>{
+    const logs = DB.kmLogs.filter(k=>k.vehicleId===v.id && monthKey(k.tanggal)===monthPrefix).map(k=>k.km);
+    if(logs.length>=2) totalKmThisMonth += (Math.max(...logs) - Math.min(...logs));
+  });
+  const costPerKmEl = document.getElementById('mCostPerKm');
+  const costPerKmSubEl = document.getElementById('mCostPerKmSub');
+  if(totalKmThisMonth>0){
+    const costPerKm = totalCostThisMonth / totalKmThisMonth;
+    costPerKmEl.textContent = 'Rp ' + Math.round(costPerKm).toLocaleString('id-ID');
+    costPerKmSubEl.textContent = `Rp ${totalCostThisMonth.toLocaleString('id-ID')} / ${totalKmThisMonth.toLocaleString('id-ID')} km`;
+  } else {
+    costPerKmEl.textContent = '-'; costPerKmSubEl.textContent = 'Data KM belum cukup';
+  }
+
+  const closedWithDowntime = DB.reports.filter(r=>r.status==='selesai' && r.downtimeJam);
+  const mttrEl = document.getElementById('mMttr');
+  mttrEl.textContent = closedWithDowntime.length
+    ? (closedWithDowntime.reduce((s,r)=>s+r.downtimeJam,0)/closedWithDowntime.length).toFixed(1) + ' jam'
+    : '-';
+
+  const gapsByVehicle = [];
+  DB.vehicles.forEach(v=>{
+    const dates = DB.reports.filter(r=>r.vehicleId===v.id).map(r=>r.tanggal).filter(Boolean).sort();
+    if(dates.length<2) return;
+    let totalGap = 0;
+    for(let i=1;i<dates.length;i++){
+      totalGap += (new Date(dates[i]) - new Date(dates[i-1])) / 86400000;
+    }
+    gapsByVehicle.push(totalGap/(dates.length-1));
+  });
+  const mtbfEl = document.getElementById('mMtbf');
+  mtbfEl.textContent = gapsByVehicle.length
+    ? Math.round(gapsByVehicle.reduce((a,b)=>a+b,0)/gapsByVehicle.length) + ' hari'
+    : '-';
+
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(refDate.getFullYear(), refDate.getMonth()-i, 1);
+    const mk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    months.push({ key: mk, label: d.toLocaleDateString('id-ID',{month:'short'}) });
+  }
+  // helper: get YYYY-MM from a date-like string, using local date parts to avoid timezone shifts
+  function monthKey(dateStr){
+    if(!dateStr) return null;
+    if(typeof dateStr==='string' && /^\d{4}-\d{2}$/.test(dateStr)) return dateStr;
+    if(typeof dateStr==='string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr.slice(0,7);
+    const d = new Date(dateStr);
+    if(isNaN(d.getTime())) return null;
+    const y = d.getFullYear(); const mth = String(d.getMonth()+1).padStart(2,'0');
+    return `${y}-${mth}`;
+  }
+
+  const monthTotals = months.map(m=>{
+    const sv = DB.services.filter(s=> monthKey(s.tanggal)===m.key ).reduce((s,x)=>s+(x.biaya||0),0);
+    const bb = DB.kmLogs.filter(k=> monthKey(k.tanggal)===m.key ).reduce((s,x)=>s+(x.biayaBbm||0),0);
+    return { key: m.key, label: m.label, total: sv+bb };
+  });
+  const maxTotal = Math.max(1, ...monthTotals.map(m=>m.total));
+  const trendWrap = document.getElementById('trendChartWrap');
+  if(monthTotals.every(m=>m.total===0)){
+    trendWrap.innerHTML = `<div class="empty-state" style="padding:20px 0;"><p>Belum ada data biaya servis/BBM untuk ditampilkan.</p></div>`;
+  } else {
+    trendWrap.innerHTML = `
+      <div style="display:flex; align-items:flex-end; gap:10px; height:140px;">
+        ${monthTotals.map(m=>`
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;">
+            <div style="font-size:11px; color:var(--muted);">${m.total>0 ? (m.total/1000000).toFixed(1)+'jt' : ''}</div>
+            <div style="width:100%; max-width:36px; height:${Math.max(4, (m.total/maxTotal)*100)}%; background:var(--primary); border-radius:4px 4px 0 0;"></div>
+            <div style="font-size:11px; color:var(--muted); text-transform:capitalize;">${m.label}</div>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
+  const reportCounts = {};
+  DB.reports.forEach(r=>{ reportCounts[r.vehicleId] = (reportCounts[r.vehicleId]||0) + 1; });
+  const top5 = Object.entries(reportCounts)
+    .map(([vehicleId,count])=>({ v: DB.vehicles.find(x=>x.id===vehicleId), count }))
+    .filter(x=>x.v)
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,5);
+  const topList = document.getElementById('topProblemList');
+  if(!top5.length){
+    topList.innerHTML = `<div class="empty-state" style="padding:20px 0;"><p>Belum ada laporan tercatat.</p></div>`;
+  } else {
+    topList.innerHTML = top5.map((x,i)=>`
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; ${i<top5.length-1?'border-bottom:1px solid var(--border);':''}">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:12px; color:var(--muted); width:16px;">${i+1}</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">${x.v.plat}</div>
+            <div style="font-size:11px; color:var(--muted);">${x.v.equipmentName||''}</div>
+          </div>
+        </div>
+        <div style="font-size:13px; font-weight:600; color:var(--red);">${x.count} laporan</div>
+      </div>
+    `).join('');
+  }
+}
+
 /* ============================================================
    RENDER ALL
    ============================================================ */
 function renderAll(){
   renderDashboard();
+  renderEvalKpis();
   renderDokumen();
   renderVehicles();
   renderPeralatan();
@@ -1732,6 +2262,8 @@ function renderAll(){
   renderKmHistory();
   renderServices();
   renderReports();
+  // refresh search suggestions and filter options after rendering data
+  populateSearchUI();
 }
 
 /* ============================================================
@@ -1764,6 +2296,12 @@ function renderDokumen(){
       if(!dateVal) return;
       docs.push({ key: t.key, label: t.label, date: dateVal, days: daysUntil(dateVal) });
     });
+    if(dokumenFilter==='all' || dokumenFilter==='maintenance'){
+      const due = getMaintenanceDue(v);
+      if(due && due.days!==null){
+        docs.push({ key: 'maintenance', label: due.kmRemaining!==null ? `${due.label} (${due.kmRemaining<=0?'lewat':'sisa'} ${Math.abs(due.kmRemaining)}km)` : due.label, date: due.date, days: due.days });
+      }
+    }
     if(docs.length===0) return;
     if(dokumenFilter!=='all' && dokumenFilter!=='tera' && !docs.find(d=>d.key===dokumenFilter)) return;
     items.push({ type: 'vehicle', id: v.id, plate: v.plat, name: v.equipmentName||'', docs });
