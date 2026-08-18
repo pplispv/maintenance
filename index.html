@@ -212,6 +212,12 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .badge-tag{background:#EF4444; color:#fff}
 .badge-stnk{background:#F59E0B; color:#fff}
 .badge-pajak{background:#F97316; color:#fff}
+.badge-suket{background:#7C3AED; color:#fff}
+
+/* small reminder box used in dokumen list for SUKET reminders */
+.reminder-box{display:none}
+/* small inline reminder used for Izin B3 in dokumen list */
+.small-reminder{margin-top:6px; padding:6px 10px; background:rgba(244, 63, 94,0.04); border:1px solid rgba(244,63,94,0.06); border-radius:8px; font-size:12px; color:var(--muted);}
 .badge-keur{background:#F43F5E; color:#fff}
 .badge-annual{background:#10B981; color:#04211C}
 .badge-tera{background:#3B82F6; color:#fff}
@@ -532,6 +538,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <div class="seg-btn" data-f="keur" onclick="setDokumenFilter('keur')">KEUR</div>
     <div class="seg-btn" data-f="annual" onclick="setDokumenFilter('annual')" style="white-space:nowrap;">Annual</div>
     <div class="seg-btn" data-f="tera" onclick="setDokumenFilter('tera')" style="white-space:nowrap;">Tera Alat</div>
+    <div class="seg-btn" data-f="suket" onclick="setDokumenFilter('suket')" style="white-space:nowrap;">SUKET / Uji Riksa</div>
     <div class="seg-btn" data-f="maintenance" onclick="setDokumenFilter('maintenance')" style="white-space:nowrap;">Servis Preventif</div>
   </div>
   <div class="card-list" id="dokumenList"></div>
@@ -700,6 +707,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 const CONFIG = {
   scriptUrl: "https://script.google.com/macros/s/AKfycbxeS5CD7tDKqOROBCFVIjgWPW0wl39mWfUUzX-hiM7yNBCX6QwJ40s7QecJDzG4X4pvrQ/exec",
 };
+
+// SUKET default validity (months) used to auto-calculate expired date from issued date
+const SUKET_VALIDITY_MONTHS = 12;
 
 // Diagnostics: capture runtime errors and unhandled rejections so we can debug
 window.addEventListener('error', (ev) => {
@@ -940,6 +950,10 @@ function normalizeRow(row){
   if('intervalHariServis' in row) row.intervalHariServis = row.intervalHariServis === '' ? null : Number(row.intervalHariServis);
   // Normalize common date fields from backend (may contain full ISO timestamps)
   const dateFields = ['ptfiTagExpired','stnkExpired','pajakExpired','keurExpired','annualInspExpired','teraExpired','tanggal'];
+  // include SUKET-related date fields
+  dateFields.push('suketInspectionDate','suketIssuedDate','suketExpiredDate');
+  // include Izin B3 date fields
+  dateFields.push('ijinB3Issued','ijinB3Expired');
   dateFields.forEach(f => {
     if(f in row && row[f]){
       const val = row[f];
@@ -1153,6 +1167,29 @@ function openVehicleForm(existing){
     <div class="field"><label>Inspection Number</label><input id="fInspeksi" value="${v.inspectionNumber||''}" placeholder="cth. INS-2026-091"></div>
     ${dateFieldHTML('fKeur', 'KEUR Expired Date', v.keurExpired)}
 
+    <div class="form-section-label">SUKET Monitoring</div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('fSuketInspection', 'Inspection Date', v.suketInspectionDate)}</div>
+      <div class="field"><label>Inspection Number Report</label><input id="fSuketInspectNo" value="${v.suketInspectionNumber||''}" placeholder="cth. INSP-2026-001"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('fSuketIssued', 'SUKET Issued Date', v.suketIssuedDate)}</div>
+      <div class="field"><label>Type of Equipment</label><input id="fSuketType" value="${v.suketType||''}" placeholder="cth. Timbangan"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Number Certificate</label><input id="fSuketCert" value="${v.suketCertNumber||''}" placeholder="cth. CERT-12345"></div>
+      <div class="field">${dateFieldHTML('fSuketExpired', 'SUKET Expired Date (auto if empty)', v.suketExpiredDate)}</div>
+    </div>
+
+    <div class="form-section-label">Izin B3</div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('fIjinB3Issued', 'Issued Date', v.ijinB3Issued)}</div>
+      <div class="field"><label>Number Certificate</label><input id="fIjinB3Number" value="${v.ijinB3Number||''}" placeholder="cth. B3-2026-001"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('fIjinB3Expired', 'Izin B3 Expired Date (auto if empty)', v.ijinB3Expired)}</div>
+    </div>
+
     <div class="form-section-label">PTFI Annual Inspection</div>
     <div class="field"><label>Annual Inspection Number</label><input id="fAnnualNo" value="${v.annualInspNumber||''}" placeholder="cth. AI-2026-014"></div>
     ${dateFieldHTML('fAnnualExp', 'Annual Inspection Expired Date', v.annualInspExpired)}
@@ -1170,6 +1207,38 @@ function openVehicleForm(existing){
     <button class="btn btn-primary btn-full" onclick="saveVehicle('${v.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deleteVehicle('${v.id}')">Hapus kendaraan</button>` : ''}
   `, 'armada');
+  // attach SUKET expiry updater after form HTML is injected — if user hasn't supplied an expired date,
+  // auto-fill the expired selects from issued date (issued + SUKET_VALIDITY_MONTHS)
+  setTimeout(()=>{
+    function updateSuketExpiredIfEmpty(){
+      const issued = getDateFieldValue('fSuketIssued');
+      if(!issued) return;
+      const dSel = document.getElementById('fSuketExpired_d');
+      const mSel = document.getElementById('fSuketExpired_m');
+      const ySel = document.getElementById('fSuketExpired_y');
+      if(!dSel || !mSel || !ySel) return;
+      // if any expired select already filled, don't overwrite
+      if(dSel.value || mSel.value || ySel.value) return;
+      const d = new Date(issued + 'T00:00:00'); d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      dSel.value = d.getDate(); mSel.value = d.getMonth()+1; ySel.value = d.getFullYear();
+    }
+    ['fSuketIssued_d','fSuketIssued_m','fSuketIssued_y'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', updateSuketExpiredIfEmpty); });
+    updateSuketExpiredIfEmpty();
+    // Izin B3 auto-expiry behaviour: auto-fill expired date from issued date if empty
+    function updateIjinB3ExpiredIfEmpty(){
+      const issued = getDateFieldValue('fIjinB3Issued');
+      if(!issued) return;
+      const dSel = document.getElementById('fIjinB3Expired_d');
+      const mSel = document.getElementById('fIjinB3Expired_m');
+      const ySel = document.getElementById('fIjinB3Expired_y');
+      if(!dSel || !mSel || !ySel) return;
+      if(dSel.value || mSel.value || ySel.value) return;
+      const d = new Date(issued + 'T00:00:00'); d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      dSel.value = d.getDate(); mSel.value = d.getMonth()+1; ySel.value = d.getFullYear();
+    }
+    ['fIjinB3Issued_d','fIjinB3Issued_m','fIjinB3Issued_y'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', updateIjinB3ExpiredIfEmpty); });
+    updateIjinB3ExpiredIfEmpty();
+  },80);
 }
 
 function openVehicleDetail(v){
@@ -1217,6 +1286,30 @@ function openVehicleDetail(v){
     <div class="field"><label>Inspection Number</label><div class="readonly-value">${val(v.inspectionNumber)}</div></div>
     <div class="field"><label>KEUR Expired</label><div class="readonly-value">${val(v.keurExpired)} ${v.keurExpired? expChip('KEUR', v.keurExpired):''}</div></div>
 
+    <div class="form-section-label">SUKET Monitoring</div>
+    <div class="field-row">
+      <div class="field"><label>Inspection Date</label><div class="readonly-value">${val(v.suketInspectionDate)}</div></div>
+      <div class="field"><label>Inspection Number Report</label><div class="readonly-value">${val(v.suketInspectionNumber)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>SUKET Issued Date</label><div class="readonly-value">${val(v.suketIssuedDate)}</div></div>
+      <div class="field"><label>Type of Equipment</label><div class="readonly-value">${val(v.suketType)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Number Certificate</label><div class="readonly-value">${val(v.suketCertNumber)}</div></div>
+      <div class="field"><label>SUKET Expired</label><div class="readonly-value">${val(v.suketExpiredDate)} ${v.suketExpiredDate? expChip('SUKET', v.suketExpiredDate):''}</div></div>
+    </div>
+    <!-- SUKET EXP (Days) is auto-calculated from issued date -->
+
+      <div class="form-section-label">Izin B3</div>
+      <div class="field-row">
+        <div class="field"><label>Issued Date</label><div class="readonly-value">${val(v.ijinB3Issued)}</div></div>
+        <div class="field"><label>Number Certificate</label><div class="readonly-value">${val(v.ijinB3Number)}</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Izin B3 Expired</label><div class="readonly-value">${val(v.ijinB3Expired)} ${v.ijinB3Expired? expChip('Izin B3', v.ijinB3Expired):''}</div></div>
+      </div>
+
     <div class="form-section-label">PTFI Annual Inspection</div>
     <div class="field"><label>Annual Inspection Number</label><div class="readonly-value">${val(v.annualInspNumber)}</div></div>
     <div class="field"><label>Annual Inspection Expired</label><div class="readonly-value">${val(v.annualInspExpired)}</div></div>
@@ -1253,6 +1346,35 @@ function saveVehicle(id){
     lokasi: document.getElementById('fLokasi').value.trim(),
     status: document.getElementById('fStatus').value,
     ptfiTagExpired: getDateFieldValue('fPtfiTag'),
+    suketInspectionDate: getDateFieldValue('fSuketInspection'),
+    suketInspectionNumber: document.getElementById('fSuketInspectNo') ? document.getElementById('fSuketInspectNo').value.trim() : '',
+    suketIssuedDate: getDateFieldValue('fSuketIssued'),
+    suketType: document.getElementById('fSuketType') ? document.getElementById('fSuketType').value.trim() : '',
+    suketCertNumber: document.getElementById('fSuketCert') ? document.getElementById('fSuketCert').value.trim() : '',
+    // allow manual expired date; if not provided, compute from issued date
+    suketExpiredDate: (function(){
+      const manual = getDateFieldValue('fSuketExpired');
+      if(manual) return manual;
+      const issued = getDateFieldValue('fSuketIssued');
+      if(!issued) return '';
+      const d = new Date(issued + 'T00:00:00');
+      d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${dd}`;
+    })(),
+    // Izin B3 fields
+    ijinB3Issued: getDateFieldValue('fIjinB3Issued'),
+    ijinB3Number: document.getElementById('fIjinB3Number') ? document.getElementById('fIjinB3Number').value.trim() : '',
+    ijinB3Expired: (function(){
+      const manual = getDateFieldValue('fIjinB3Expired');
+      if(manual) return manual;
+      const issued = getDateFieldValue('fIjinB3Issued');
+      if(!issued) return '';
+      const d = new Date(issued + 'T00:00:00');
+      d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${dd}`;
+    })(),
     stnkExpired: getDateFieldValue('fStnk'),
     pajakExpired: getDateFieldValue('fPajak'),
     keurExpired: getDateFieldValue('fKeur'),
@@ -1508,9 +1630,17 @@ function expChip(label, dateStr){
   const days = daysUntil(dateStr);
   if(days === null) return '';
   let cls = 'badge-ok';
-  if(days <= 0) cls = 'badge-warn';
-  else if(days <= 30) cls = 'badge-warn';
-  else if(days <= 60) cls = 'badge-idle';
+  // SUKET should warn earlier (60 days) — detect by label containing 'suket'
+  const low = String(label || '').toLowerCase();
+  if(low.includes('suket') || low.includes('izin') || low.includes('b3')){
+    if(days <= 0) cls = 'badge-warn';
+    else if(days <= 60) cls = 'badge-warn';
+    else if(days <= 120) cls = 'badge-idle';
+  } else {
+    if(days <= 0) cls = 'badge-warn';
+    else if(days <= 30) cls = 'badge-warn';
+    else if(days <= 60) cls = 'badge-idle';
+  }
   const text = days <= 0 ? `${label} lewat ${Math.abs(days)}h` : `${label} ${days}h lagi`;
   return `<span class="badge ${cls}" style="text-transform:none;">${badgeIconHTML('doc')} ${text}</span>`;
 }
@@ -1625,8 +1755,9 @@ function primaryDocChip(v){
   const doc = getPrimaryDoc(v);
   if(!doc) return '';
   let cls = 'badge-ok';
+  const thresh = (doc.key==='suket' || doc.key==='ijinb3') ? 60 : 30;
   if(doc.days <= 0) cls = 'badge-warn';
-  else if(doc.days <= 30) cls = 'badge-warn';
+  else if(doc.days <= thresh) cls = 'badge-warn';
   else if(doc.days <= 60) cls = 'badge-idle';
   const typeCls = doc.key ? ' badge-' + doc.key : '';
   const text = doc.days <= 0 ? `${doc.label} lewat ${Math.abs(doc.days)} hari` : `${doc.label} ${doc.days} hari lagi`;
@@ -2144,7 +2275,8 @@ function renderDashboard(){
     dokList.innerHTML = `<div class="empty-state"><p>Tidak ada PTFI TAGGING/STNK/Pajak/KEUR yang mendekati expired.</p></div>`;
   } else {
     dokList.innerHTML = urgent.map(({v,doc})=>{
-      const urgentFlag = typeof doc.days==='number' && doc.days<=30;
+      const thresh = (doc.key==='suket' || doc.key==='ijinb3') ? 60 : 30;
+      const urgentFlag = typeof doc.days==='number' && doc.days<=thresh;
       const badgeCls = doc.days<=0 ? 'badge-warn' : urgentFlag ? 'badge-warn' : 'badge-idle';
       const typeCls = doc.key ? ' badge-' + doc.key : '';
       const badgeExtra = urgentFlag ? ' badge-urgent' : '';
@@ -2158,7 +2290,7 @@ function renderDashboard(){
               <div class="item-sub" style="margin-top:6px; color:var(--muted);">${fmtDate(doc.date)}</div>
             </div></div>
           </div>
-          <div class="item-sub" style="color:${doc.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+          <div class="item-sub" style="color:${doc.days<=thresh?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
         </div>
       </div>`;
       return `<div class="item-card" onclick="goTo('dokumen')">
@@ -2170,7 +2302,7 @@ function renderDashboard(){
               <div class="item-sub" style="margin-top:6px; color:var(--muted);">${fmtDate(doc.date)}</div>
             </div></div>
           </div>
-          <div class="item-sub" style="color:${doc.days<=30?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
+          <div class="item-sub" style="color:${doc.days<=thresh?'var(--red)':'var(--text)'}; font-weight:600;">${daysText}</div>
         </div>
       </div>`;
     }).join('');
@@ -2349,7 +2481,9 @@ const DOKUMEN_TYPES = [
   { key: 'stnk', label: 'STNK', field: 'stnkExpired' },
   { key: 'pajak', label: 'Pajak', field: 'pajakExpired' },
   { key: 'keur', label: 'KEUR', field: 'keurExpired' },
-  { key: 'annual', label: 'Annual Inspection', field: 'annualInspExpired' }
+  { key: 'annual', label: 'Annual Inspection', field: 'annualInspExpired' },
+  { key: 'suket', label: 'SUKET / Uji Riksa', field: 'suketExpiredDate' }
+  ,{ key: 'ijinb3', label: 'Izin B3', field: 'ijinB3Expired' }
 ];
 
 function setDokumenFilter(f){
@@ -2370,6 +2504,10 @@ function renderDokumen(){
       if(!dateVal) return;
       docs.push({ key: t.key, label: t.label, date: dateVal, days: daysUntil(dateVal) });
     });
+    if(dokumenFilter==='tera'){
+      // Tera berasal dari daftar Peralatan, bukan Armada — skip kendaraan
+      return;
+    }
     if(dokumenFilter==='all' || dokumenFilter==='maintenance'){
       const due = getMaintenanceDue(v);
       if(due && due.days!==null){
@@ -2377,7 +2515,7 @@ function renderDokumen(){
       }
     }
     if(docs.length===0) return;
-    if(dokumenFilter!=='all' && dokumenFilter!=='tera' && !docs.find(d=>d.key===dokumenFilter)) return;
+    if(dokumenFilter!=='all' && dokumenFilter!=='maintenance' && !docs.find(d=>d.key===dokumenFilter)) return;
     items.push({ type: 'vehicle', id: v.id, plate: v.plat, name: v.equipmentName||'', docs });
   });
   if(dokumenFilter==='all' || dokumenFilter==='tera'){
@@ -2400,13 +2538,21 @@ function renderDokumen(){
   window.__dokumenItems = items;
   list.innerHTML = items.map((it,i)=>{
     const badges = it.docs.map(d=>{
-      const urgent = (typeof d.days==='number') && d.days<=30;
+      const thresh = (d.key==='suket' || d.key==='ijinb3') ? 60 : 30; // SUKET and Izin B3 warn earlier (60 days)
+      const urgent = (typeof d.days==='number') && d.days<=thresh;
       const urgencyCls = d.days<=0 ? 'badge-warn' : urgent ? 'badge-warn' : d.days<=60 ? 'badge-idle' : 'badge-ok';
       const extra = urgent ? ' badge-urgent' : '';
       const typeCls = d.key ? ' badge-' + d.key : '';
       const short = (typeof d.days==='number') ? (d.days<=0?`Lewat ${Math.abs(d.days)}h`:`${d.days}h`) : '';
       return `<span class="badge ${urgencyCls}${typeCls}${extra}" style="margin-right:8px; font-weight:700; text-transform:none; font-size:12px;">${badgeIconHTML(d.key)} ${d.label}${short? ' · '+short : ''}</span>`;
     }).join('');
+    // small inline box for Izin B3 showing issued/expired summary (only one per item)
+    const ijinB3Box = it.docs.filter(d=>d.key==='ijinb3').map(d=>{
+      const when = d.date || '-';
+      const left = (typeof d.days==='number') ? (d.days<=0?`Lewat ${Math.abs(d.days)} hari`:`${d.days} hari lagi`) : '';
+      return `<div class="small-reminder">• Izin B3: ${when}${left? ' · '+left : ''}</div>`;
+    }).join('');
+    
     const nearest = it.docs.map(d=>typeof d.days==='number'?d.days:9999).reduce((m,x)=>Math.min(m,x),9999);
     const daysText = nearest===9999?'-':(nearest<=0?`Lewat ${Math.abs(nearest)} hari`:`${nearest} hari lagi`);
     const openCall = it.type==='vehicle' ? `openVehicleAction("${it.id}")` : `openPeralatanAction("${it.id}")`;
@@ -2417,11 +2563,11 @@ function renderDokumen(){
           <div style="min-width:260px;">
             <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${it.plate}</span></div>
             <div class="item-title" style="margin-top:6px;">${it.name? it.name : '-'}</div>
-            <div style="margin-top:8px;">${badges}</div>
+            <div style="margin-top:8px;">${badges}${ijinB3Box}</div>
           </div>
         </div>
         <div style="text-align:right;">
-          <div class="item-sub" style="color:${nearest<=30?'var(--red)':'var(--text)'}; font-weight:700;">${daysText}</div>
+          <div class="item-sub" style="color:${nearest<=ALERT_WINDOW?'var(--red)':'var(--text)'}; font-weight:700;">${daysText}</div>
         </div>
       </div>
     </div>`;
