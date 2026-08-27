@@ -952,6 +952,8 @@ function normalizeRow(row){
   const dateFields = ['ptfiTagExpired','stnkExpired','pajakExpired','keurExpired','annualInspExpired','teraExpired','tanggal'];
   // include SUKET-related date fields
   dateFields.push('suketInspectionDate','suketIssuedDate','suketExpiredDate');
+  // include calibration monitoring date fields
+  dateFields.push('calibrationIssuedDate','calibrationExpiredDate');
   // include Izin B3 date fields
   dateFields.push('ijinB3Issued','ijinB3Expired');
   dateFields.forEach(f => {
@@ -1430,9 +1432,33 @@ function openPeralatanForm(existing){
       </select>
     </div>
 
-    <div class="form-section-label">Tera / Uji Riksa</div>
-    <div class="field"><label>Nomor Sertifikat Tera/Uji Riksa</label><input id="pTeraNo" value="${p.teraNumber||''}" placeholder="cth. TERA-2026-088"></div>
-    ${dateFieldHTML('pTeraExp', 'Tanggal Expired Tera/Uji Riksa', p.teraExpired)}
+    <div class="form-section-label">PTFI TAGGING</div>
+    ${dateFieldHTML('pPtfiTag', 'PTFI TAGGING Expired Date', p.ptfiTagExpired)}
+
+    <div class="form-section-label">SUKET Monitoring</div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('pSuketInspection', 'Inspection Date', p.suketInspectionDate)}</div>
+      <div class="field"><label>Inspection Number Report</label><input id="pSuketInspectNo" value="${p.suketInspectionNumber||''}" placeholder="cth. INSP-2026-001"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('pSuketIssued', 'SUKET Issued Date', p.suketIssuedDate)}</div>
+      <div class="field"><label>Type of Equipment</label><input id="pSuketType" value="${p.suketType||''}" placeholder="cth. Timbangan"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Number Certificate</label><input id="pSuketCert" value="${p.suketCertNumber||''}" placeholder="cth. CERT-12345"></div>
+      <div class="field">${dateFieldHTML('pSuketExpired', 'SUKET Expired Date', p.suketExpiredDate)}</div>
+    </div>
+    <div class="field"><label>Expired Days</label><div class="readonly-value">${daysUntil(p.suketExpiredDate) === null ? '-' : daysUntil(p.suketExpiredDate)}</div></div>
+
+    <div class="form-section-label">Calibration Monitoring</div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('pCalibrationIssued', 'Issued Date', p.calibrationIssuedDate)}</div>
+      <div class="field"><label>Number Certificate</label><input id="pCalibrationCert" value="${p.calibrationCertNumber||''}" placeholder="cth. CAL-2026-001"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">${dateFieldHTML('pCalibrationExpired', 'Expired Date', p.calibrationExpiredDate)}</div>
+      <div class="field"><label>Expired Days</label><div class="readonly-value">${daysUntil(p.calibrationExpiredDate) === null ? '-' : daysUntil(p.calibrationExpiredDate)}</div></div>
+    </div>
 
     <button class="btn btn-primary btn-full" onclick="savePeralatan('${p.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deletePeralatan('${p.id}')">Hapus alat</button>` : ''}
@@ -1465,9 +1491,34 @@ function openPeralatanDetail(p){
 
       <div class="field"><label>Gambar</label><div class="readonly-value">${p.photo?`<img src="${p.photo}" class="veh-thumb" style="max-width:180px">`:'-'}</div></div>
 
-    <div class="form-section-label">Tera / Uji Riksa</div>
-    <div class="field"><label>Nomor Sertifikat</label><div class="readonly-value">${val(p.teraNumber)}</div></div>
-    <div class="field"><label>Tanggal Expired</label><div class="readonly-value">${val(p.teraExpired)} ${p.teraExpired? expChip('Tera', p.teraExpired):''}</div></div>
+    <div class="form-section-label">PTFI TAGGING</div>
+    <div class="field"><label>PTFI TAGGING Expired Date</label><div class="readonly-value">${val(p.ptfiTagExpired)} ${p.ptfiTagExpired ? expChip('PTFI TAGGING', p.ptfiTagExpired) : ''}</div></div>
+
+    <div class="form-section-label">SUKET Monitoring</div>
+    <div class="field-row">
+      <div class="field"><label>Inspection Date</label><div class="readonly-value">${val(p.suketInspectionDate)}</div></div>
+      <div class="field"><label>Inspection Number Report</label><div class="readonly-value">${val(p.suketInspectionNumber)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>SUKET Issued Date</label><div class="readonly-value">${val(p.suketIssuedDate)}</div></div>
+      <div class="field"><label>Type of Equipment</label><div class="readonly-value">${val(p.suketType)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Number Certificate</label><div class="readonly-value">${val(p.suketCertNumber)}</div></div>
+      <div class="field"><label>SUKET Expired Date</label><div class="readonly-value">${val(p.suketExpiredDate)} ${p.suketExpiredDate ? expChip('SUKET', p.suketExpiredDate) : ''}</div></div>
+    </div>
+    <div class="field"><label>Expired Days</label><div class="readonly-value">${daysUntil(p.suketExpiredDate) === null ? '-' : daysUntil(p.suketExpiredDate)}</div></div>
+
+    <div class="form-section-label">Calibration Monitoring</div>
+    <div class="field-row">
+      <div class="field"><label>Issued Date</label><div class="readonly-value">${val(p.calibrationIssuedDate)}</div></div>
+      <div class="field"><label>Number Certificate</label><div class="readonly-value">${val(p.calibrationCertNumber)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Expired Date</label><div class="readonly-value">${val(p.calibrationExpiredDate)} ${p.calibrationExpiredDate ? expChip('Calibration', p.calibrationExpiredDate) : ''}</div></div>
+      <div class="field"><label>Expired Days</label><div class="readonly-value">${daysUntil(p.calibrationExpiredDate) === null ? '-' : daysUntil(p.calibrationExpiredDate)}</div></div>
+    </div>
+
   `, 'peralatan');
 }
 
@@ -1492,8 +1543,30 @@ function savePeralatan(id){
     lokasi: document.getElementById('pLokasi').value.trim(),
     photo: document.getElementById('pPhoto')? document.getElementById('pPhoto').value.trim() : '',
     status: document.getElementById('pStatus').value,
-    teraNumber: document.getElementById('pTeraNo').value.trim(),
-    teraExpired: getDateFieldValue('pTeraExp')
+    ptfiTagExpired: getDateFieldValue('pPtfiTag'),
+    suketInspectionDate: getDateFieldValue('pSuketInspection'),
+    suketInspectionNumber: document.getElementById('pSuketInspectNo') ? document.getElementById('pSuketInspectNo').value.trim() : '',
+    suketIssuedDate: getDateFieldValue('pSuketIssued'),
+    suketType: document.getElementById('pSuketType') ? document.getElementById('pSuketType').value.trim() : '',
+    suketCertNumber: document.getElementById('pSuketCert') ? document.getElementById('pSuketCert').value.trim() : '',
+    suketExpiredDate: getDateFieldValue('pSuketExpired') || (function(){
+      const issued = getDateFieldValue('pSuketIssued');
+      if(!issued) return '';
+      const d = new Date(issued + 'T00:00:00');
+      d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${dd}`;
+    })(),
+    calibrationIssuedDate: getDateFieldValue('pCalibrationIssued'),
+    calibrationCertNumber: document.getElementById('pCalibrationCert') ? document.getElementById('pCalibrationCert').value.trim() : '',
+    calibrationExpiredDate: getDateFieldValue('pCalibrationExpired') || (function(){
+      const issued = getDateFieldValue('pCalibrationIssued');
+      if(!issued) return '';
+      const d = new Date(issued + 'T00:00:00');
+      d.setMonth(d.getMonth() + SUKET_VALIDITY_MONTHS);
+      const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${dd}`;
+    })()
   };
   if(id){
     const p = DB.peralatan.find(x=>x.id===id);
@@ -1566,18 +1639,17 @@ function renderPeralatan(){
   if(compactView){
     list.innerHTML = `
       <table class="compact-table">
-        <thead><tr><th>Kode / Nama Alat</th><th>Status</th><th>Tera</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
+        <thead><tr><th>Kode / Nama Alat</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
         <tbody>
           ${items.map(p=>{
-            const teraDays = daysUntil(p.teraExpired);
-            const teraText = teraDays===null?'-':(teraDays<=0?`Lewat ${Math.abs(teraDays)} hari`:`${teraDays} hari`);
             const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
             const name = p.namaAlat || '-';
             const code = p.kodeAlat ? (' · ' + p.kodeAlat) : '';
+            const monitoringHtml = equipmentExpiryChipsHtml(p);
             return `<tr onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
               <td><strong>${name}</strong>${code}</td>
               <td><span class="badge ${badge}" style="text-transform:none;">${p.status}</span></td>
-              <td>${teraText}</td>
+              <td>${monitoringHtml || '-'}</td>
               <td>${p.lokasi||''}${p.noSeri? ' · ' + p.noSeri : ''}</td>
               <td class="compact-actions">${isAdmin?`<button class="btn" onclick="event.stopPropagation(); openPeralatanForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn" onclick="event.stopPropagation(); deletePeralatan('${p.id}');">Hapus</button>`:''}</td>
             </tr>`;
@@ -1587,13 +1659,7 @@ function renderPeralatan(){
   } else {
     list.innerHTML = items.map(p=>{
       const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
-      const teraDays = daysUntil(p.teraExpired);
-      let teraChip = '';
-      if(teraDays !== null){
-        const cls = teraDays<=0 ? 'badge-warn' : teraDays<=30 ? 'badge-warn' : teraDays<=60 ? 'badge-idle' : 'badge-ok';
-        const text = teraDays<=0 ? `Tera lewat ${Math.abs(teraDays)} hari` : `Tera ${teraDays} hari lagi`;
-        teraChip = `<span class="badge ${cls}" style="text-transform:none;">${text}</span>`;
-      }
+      const monitoringHtml = equipmentExpiryChipsHtml(p);
       const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
       return `<div class="item-card" onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
           <div class="item-row">
@@ -1610,10 +1676,34 @@ function renderPeralatan(){
               <div class="item-sub">${p.noSeri||''}</div>
             </div>
           </div>
-          ${teraChip ? `<div style="margin-top:10px;">${teraChip}</div>` : ''}
+          ${monitoringHtml ? `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">${monitoringHtml}</div>` : ''}
         </div>`;
     }).join('');
   }
+}
+
+function equipmentExpiryChipsHtml(p){
+  const entries = [];
+  const items = [
+    { date: p.ptfiTagExpired, label: 'PTFI TAGGING', warnThreshold: 60 },
+    { date: p.suketExpiredDate, label: 'SUKET', warnThreshold: 60 },
+    { date: p.calibrationExpiredDate, label: 'Calibration', warnThreshold: 60 },
+    { date: p.teraExpired, label: 'Tera', warnThreshold: 30 }
+  ];
+
+  items.forEach(({date, label, warnThreshold}) => {
+    if(!date) return;
+    const days = daysUntil(date);
+    if(days === null) return;
+    let cls = 'badge-ok';
+    if(days <= 0) cls = 'badge-warn';
+    else if(days <= warnThreshold) cls = 'badge-warn';
+    else if(days <= warnThreshold * 2) cls = 'badge-idle';
+    const text = days <= 0 ? `${label} lewat ${Math.abs(days)} hari` : `${label} ${days} hari lagi`;
+    entries.push(`<span class="badge ${cls}" style="text-transform:none;">${text}</span>`);
+  });
+
+  return entries.join('');
 }
 
 /* EXP days helper: null date -> null, else integer days remaining (negative = expired) */
