@@ -311,8 +311,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .service-toolbar{display:flex; flex-direction:column; gap:8px; align-items:stretch; width:100%;}
 .service-section-head{display:grid; grid-template-columns:180px minmax(0,1fr); align-items:start; gap:18px;}
 .service-section-head > .section-title{padding-top:10px; white-space:nowrap;}
-.service-toolbar-top{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center;}
-.service-filter-row{display:grid; grid-template-columns:minmax(125px,1fr) minmax(125px,1fr) minmax(110px,1fr) minmax(190px,1.6fr) minmax(105px,1fr) minmax(105px,1fr); gap:8px; align-items:center;}
+.service-toolbar-top{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; gap:8px; align-items:center;}
+.service-toolbar-top .btn{min-width:86px; white-space:nowrap; padding-left:14px; padding-right:14px;}
+.service-filter-row{display:grid; grid-template-columns:repeat(4,minmax(105px,1fr)) minmax(165px,1.4fr) repeat(2,minmax(100px,1fr)); gap:8px; align-items:center;}
 .service-toolbar-top .search-input{width:100%; min-width:0;}
 .service-filter{border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:9px 10px; font-size:13px; min-width:0; width:100%; height:38px;}
 .service-filter.cost{width:100%; min-width:0;}
@@ -323,6 +324,8 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   .service-filter-row{grid-template-columns:repeat(2, minmax(0, 1fr));}
   .service-filter, .service-filter.cost{width:100%; min-width:0;}
   .service-toolbar-top .search-input{min-width:0; width:100%;}
+  .service-toolbar-top{grid-template-columns:minmax(0,1fr) auto auto auto;}
+  .service-toolbar-top .btn{min-width:78px; padding-left:10px; padding-right:10px;}
 }
 
 /* Bottom nav */
@@ -531,7 +534,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
       <div class="card-list-plain" id="trendChartWrap" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px;"></div>
     </div>
     <div>
-      <div class="section-head"><div class="section-title" id="lblTop5Title" style="font-size:14px;">Top 5 Top 5 kendaraan bermasalah</div></div>
+      <div class="section-head"><div class="section-title" id="lblTop5Title" style="font-size:14px;">Top 5 Maintenance Corrective Action</div></div>
       <div id="topProblemList" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px 16px;"></div>
     </div>
   </div>
@@ -600,6 +603,22 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
   <div class="card-list" id="peralatanList"></div>
 </div>
 
+<!-- RO BOX -->
+<div class="screen" id="screen-ro-box">
+  <div class="section-head">
+    <div class="section-title">RO Box</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+        <input id="searchROBox" class="search-input" placeholder="Cari RO Box (nama, kode, seri)" oninput="renderROBox()">
+        <button class="search-clear hidden" id="clearSearchROBox" onclick="clearSearch('searchROBox')">✕</button>
+      </div>
+      <button id="addROBoxBtn" class="btn" onclick="openROBoxForm()">+ RO Box</button>
+    </div>
+  </div>
+  <div class="card-list" id="roBoxList"></div>
+</div>
+
 <!-- FORM PAGE (halaman penuh untuk tambah/ubah, dipakai Armada & Peralatan) -->
 <div class="screen" id="screen-formpage">
   <div class="formpage-head">
@@ -645,9 +664,17 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <div class="service-toolbar">
       <div class="service-toolbar-top">
         <input id="searchService" class="search-input" placeholder="Cari servis (plat, jenis, item)" oninput="renderServices()">
+        <button id="addKmBtn" class="btn" onclick="openKmForm()">+ KM</button>
+        <button id="addROBoxRecordBtn" class="btn" onclick="openROBoxRecordForm()">+ Record RO Box</button>
         <button id="addServiceBtn" class="btn" onclick="openServiceForm()">+ Servis</button>
       </div>
       <div class="service-filter-row">
+        <select id="serviceAssetTypeFilter" class="service-filter" onchange="renderServices()">
+          <option value="">Semua sumber</option>
+          <option value="armada">Armada</option>
+          <option value="peralatan">Peralatan</option>
+          <option value="ro-box">RO Box</option>
+        </select>
         <select id="serviceCategoryFilter" class="service-filter" onchange="renderServices()">
           <option value="">Semua kategori</option>
           <option value="preventive">Preventive</option>
@@ -709,9 +736,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>
     <span>Peralatan</span>
   </div>
-  <div class="nav-btn" data-screen="km" onclick="goTo('km')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
-    <span>KM</span>
+  <div class="nav-btn" data-screen="ro-box" onclick="goTo('ro-box')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M8 9h8M8 13h8M8 17h5"></path></svg>
+    <span>RO Box</span>
   </div>
   <div class="nav-btn" data-screen="servis" onclick="goTo('servis')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.4 2.4-2-2 2.4-2.4Z"/></svg>
@@ -746,7 +773,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
    4. Salin "Web app URL" yang muncul, tempel di bawah ini
 */
 const CONFIG = {
-  scriptUrl: "https://script.google.com/macros/s/AKfycbxeS5CD7tDKqOROBCFVIjgWPW0wl39mWfUUzX-hiM7yNBCX6QwJ40s7QecJDzG4X4pvrQ/exec",
+  scriptUrl: "https://script.google.com/macros/s/AKfycby_NpR6StrfLYDOxhqfknxKsrIfLMQUpKrKwutWcbtKJrpVAxPg8Fwlqt1TQhokkgLyrA/exec",
 };
 
 // SUKET default validity (months) used to auto-calculate expired date from issued date
@@ -779,13 +806,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* ============================================================
    STATE
    ============================================================ */
-let DB = { vehicles: [], peralatan: [], kmLogs: [], services: [], reports: [] };
+let DB = { vehicles: [], peralatan: [], roBox: [], kmLogs: [], services: [], reports: [] };
 let currentUserName = "Pengguna";
 // Admin config: list of lowercase names allowed to edit
 const ADMINS = ['admin','supervisor','ptfi'];
 let isAdmin = false;
 function isMaintenanceUser(){ return currentUserName.toLowerCase() === 'maintenance'; }
 function canEditSection(section){ return isAdmin || (isMaintenanceUser() && ['km','servis','laporan'].includes(section)); }
+let serviceRecordMode = false;
 let reportFilter = "all";
 let dokumenFilter = "all";
 let activeScreen = "dashboard";
@@ -802,6 +830,7 @@ function toggleCompactView(){
   document.getElementById('compactToggle').textContent = compactView ? 'Expanded view' : 'Compact view';
   if(activeScreen==='armada') renderVehicles();
   else if(activeScreen==='peralatan') renderPeralatan();
+  else if(activeScreen==='ro-box') renderROBox();
 }
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -888,11 +917,17 @@ function updateAdminUI(){
   const addVehicle = document.getElementById('addVehicleBtn');
   const addPeralatan = document.getElementById('addPeralatanBtn');
   const addService = document.getElementById('addServiceBtn');
+  const addKm = document.getElementById('addKmBtn');
+  const addROBoxRecord = document.getElementById('addROBoxRecordBtn');
   const addReport = document.getElementById('addReportBtn');
   const fab = document.getElementById('fab');
   if(addVehicle) addVehicle.style.display = canEditSection('armada') ? 'inline-flex' : 'none';
   if(addPeralatan) addPeralatan.style.display = canEditSection('peralatan') ? 'inline-flex' : 'none';
+  const addROBox = document.getElementById('addROBoxBtn');
+  if(addROBox) addROBox.style.display = canEditSection('ro-box') ? 'inline-flex' : 'none';
   if(addService) addService.style.display = canEditSection('servis') ? 'inline-flex' : 'none';
+  if(addKm) addKm.style.display = canEditSection('km') ? 'inline-flex' : 'none';
+  if(addROBoxRecord) addROBoxRecord.style.display = canEditSection('servis') ? 'inline-flex' : 'none';
   if(addReport) addReport.style.display = canEditSection('laporan') ? 'inline-flex' : 'none';
   if(fab) fab.style.display = canEditSection(activeScreen) ? 'flex' : 'none';
 }
@@ -916,7 +951,7 @@ function populateSearchUI(){
   populateSearchSuggestions();
   populateVehicleTypeFilter();
   // toggle clear buttons
-  ['searchArmada','searchPeralatan','searchKM','searchService','searchReport'].forEach(id=>{
+  ['searchArmada','searchPeralatan','searchROBox','searchKM','searchService','searchReport'].forEach(id=>{
     const el = document.getElementById(id);
     const btn = document.getElementById('clear' + id.charAt(0).toUpperCase() + id.slice(1));
     if(el && btn){ btn.classList.toggle('hidden', !el.value); }
@@ -935,6 +970,7 @@ function populateSearchSuggestions(){
   const vals = [];
   DB.vehicles.forEach(v=>{ if(v.plat) vals.push(v.plat); if(v.equipmentName) vals.push(v.equipmentName); if(v.equipmentCode) vals.push(v.equipmentCode); });
   DB.peralatan.forEach(p=>{ if(p.kodeAlat) vals.push(p.kodeAlat); if(p.namaAlat) vals.push(p.namaAlat); });
+  DB.roBox.forEach(p=>{ if(p.kodeAlat) vals.push(p.kodeAlat); if(p.namaAlat) vals.push(p.namaAlat); });
   // unique
   const uniq = Array.from(new Set(vals)).slice(0,200);
   ds.innerHTML = uniq.map(s=>`<option value="${s}"></option>`).join('');
@@ -947,9 +983,10 @@ function populateVehicleTypeFilter(){
 }
 
 function clearSearch(id){
-  const el = document.getElementById(id); if(!el) return; el.value = ''; if(id==='searchArmada' || id==='searchPeralatan') document.getElementById('clear'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('hidden');
+  const el = document.getElementById(id); if(!el) return; el.value = ''; if(id==='searchArmada' || id==='searchPeralatan' || id==='searchROBox') document.getElementById('clear'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('hidden');
   if(id==='searchArmada') renderVehicles();
   if(id==='searchPeralatan') renderPeralatan();
+  if(id==='searchROBox') renderROBox();
   if(id==='searchKM') renderKmHistory();
   if(id==='searchService') renderServices();
   if(id==='searchReport') renderReports();
@@ -965,9 +1002,11 @@ async function syncFromSheet(){
     const res = await fetch(CONFIG.scriptUrl);
     if(!res.ok) throw new Error("Gagal mengambil data (" + res.status + ")");
     const parsed = await res.json();
+    const hasRemoteROBox = Object.prototype.hasOwnProperty.call(parsed, 'roBox') || Object.prototype.hasOwnProperty.call(parsed, 'robox') || Object.prototype.hasOwnProperty.call(parsed, 'rOBox');
     DB = {
       vehicles: (parsed.vehicles || []).map(normalizeRow),
       peralatan: (parsed.peralatan || []).map(normalizeRow),
+      roBox: hasRemoteROBox ? (parsed.roBox || parsed.robox || parsed.rOBox || []).map(normalizeRow) : DB.roBox,
       kmLogs: (parsed.kmLogs || []).map(normalizeRow),
       services: (parsed.services || []).map(normalizeRow),
       reports: (parsed.reports || []).map(normalizeRow)
@@ -1109,9 +1148,9 @@ function goTo(screen){
   document.getElementById('screen-'+screen).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===screen));
   document.getElementById('fab').classList.toggle('hidden', !canEditSection(screen));
-  // show compact toggle only for Armada and Peralatan screens
+  // show compact toggle for equipment-style screens
   const ct = document.getElementById('compactToggle');
-  if(ct) ct.style.display = (screen==='armada' || screen==='peralatan') ? 'inline-flex' : 'none';
+  if(ct) ct.style.display = (screen==='armada' || screen==='peralatan' || screen==='ro-box') ? 'inline-flex' : 'none';
   renderAll();
   updateAdminUI();
 }
@@ -1119,6 +1158,7 @@ function goTo(screen){
 function handleFab(){
   if(activeScreen==='armada') openVehicleForm();
   else if(activeScreen==='peralatan') openPeralatanForm();
+  else if(activeScreen==='ro-box') openROBoxForm();
   else if(activeScreen==='servis') openServiceForm();
   else if(activeScreen==='laporan') openReportForm();
   else goTo('km');
@@ -1447,9 +1487,9 @@ function saveVehicle(id){
    yang perlu tera / uji riksa berkala
    ============================================================ */
 function openPeralatanForm(existing){
-  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
+  if(!canEditSection(roBoxMode ? 'ro-box' : 'peralatan')){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const p = existing || {};
-  openFormPage(existing ? 'Ubah alat' : 'Tambah alat', `
+  openFormPage(existing ? (roBoxMode ? 'Ubah RO Box' : 'Ubah alat') : (roBoxMode ? 'Tambah RO Box' : 'Tambah alat'), `
     <div class="form-section-label">Identitas Alat</div>
     <div class="field-row">
       <div class="field"><label>Kode Alat</label><input id="pKode" value="${p.kodeAlat||''}" placeholder="cth. AL-0031"></div>
@@ -1506,14 +1546,16 @@ function openPeralatanForm(existing){
 
     <button class="btn btn-primary btn-full" onclick="savePeralatan('${p.id||''}')">Simpan</button>
     ${existing ? `<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="deletePeralatan('${p.id}')">Hapus alat</button>` : ''}
-  `, 'peralatan');
+  `, roBoxMode ? 'ro-box' : 'peralatan');
 }
+
+function openROBoxForm(existing){ roBoxMode = true; openPeralatanForm(existing); }
 
 function openPeralatanDetail(p){
   const val = x=> x||'-';
   const teraDays = daysUntil(p.teraExpired);
   const teraText = teraDays===null?'-':(teraDays<=0?`Lewat ${Math.abs(teraDays)} hari`:`${teraDays} hari lagi`);
-  openFormPage('Detail alat', `
+  openFormPage(roBoxMode ? 'Detail RO Box' : 'Detail alat', `
     <div class="form-section-label">Identitas Alat</div>
     <div class="field-row">
       <div class="field"><label>Kode Alat</label><div class="readonly-value">${val(p.kodeAlat)}</div></div>
@@ -1563,17 +1605,27 @@ function openPeralatanDetail(p){
       <div class="field"><label>Expired Days</label><div class="readonly-value">${daysUntil(p.calibrationExpiredDate) === null ? '-' : daysUntil(p.calibrationExpiredDate)}</div></div>
     </div>
 
-  `, 'peralatan');
+  `, roBoxMode ? 'ro-box' : 'peralatan');
 }
+
+function openROBoxDetail(p){ roBoxMode = true; openPeralatanDetail(p); }
 
 function openPeralatanAction(id){
   const p = DB.peralatan.find(x=>x.id===id);
   if(!p) return;
+  roBoxMode = false;
   if(isAdmin) openPeralatanForm(p); else openPeralatanDetail(p);
 }
 
+function openROBoxAction(id){
+  const p = DB.roBox.find(x=>x.id===id);
+  if(!p) return;
+  roBoxMode = true;
+  if(canEditSection('ro-box')) openPeralatanForm(p); else openPeralatanDetail(p);
+}
+
 function savePeralatan(id){
-  if(!isAdmin){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
+  if(!canEditSection(roBoxMode ? 'ro-box' : 'peralatan')){ showToast('Hanya admin yang dapat mengedit data', 'err'); return; }
   const nama = document.getElementById('pNama').value.trim();
   if(!nama){ showToast('Nama alat wajib diisi', 'err'); return; }
   const data = {
@@ -1613,32 +1665,34 @@ function savePeralatan(id){
     })()
   };
   if(id){
-    const p = DB.peralatan.find(x=>x.id===id);
+    const collection = roBoxMode ? DB.roBox : DB.peralatan;
+    const p = collection.find(x=>x.id===id);
     Object.assign(p, data);
   } else {
-    DB.peralatan.push({ id: uid(), ...data });
+    (roBoxMode ? DB.roBox : DB.peralatan).push({ id: uid(), ...data });
   }
   saveToSheet();
   showToast('Alat disimpan', 'ok');
-  goTo('peralatan');
+  goTo(roBoxMode ? 'ro-box' : 'peralatan');
 }
 
 function deletePeralatan(id){
-  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  if(!canEditSection(roBoxMode ? 'ro-box' : 'peralatan')){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
   openSheet(`
     <div class="sheet-head">
       <div class="sheet-title">Konfirmasi hapus</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
-    <p>Anda yakin ingin menghapus alat ini? Tindakan ini tidak dapat dibatalkan.</p>
+    <p>Anda yakin ingin menghapus ${roBoxMode ? 'RO Box' : 'alat'} ini? Tindakan ini tidak dapat dibatalkan.</p>
     <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn" onclick="closeSheet()">Tidak</button><button class="btn btn-danger" onclick="performDeletePeralatan('${id}')">Ya, Hapus</button></div>
   `);
 }
 
 function performDeletePeralatan(id){
-  if(!isAdmin){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
-  DB.peralatan = DB.peralatan.filter(p=>p.id!==id);
-  closeSheet(); saveToSheet(); showToast('Alat dihapus', 'ok'); goTo('peralatan');
+  if(!canEditSection(roBoxMode ? 'ro-box' : 'peralatan')){ showToast('Hanya admin yang dapat menghapus data', 'err'); return; }
+  if(roBoxMode) DB.roBox = DB.roBox.filter(p=>p.id!==id);
+  else DB.peralatan = DB.peralatan.filter(p=>p.id!==id);
+  closeSheet(); saveToSheet(); showToast(roBoxMode ? 'RO Box dihapus' : 'Alat dihapus', 'ok'); goTo(roBoxMode ? 'ro-box' : 'peralatan');
 }
 
 // Delete vehicle with confirmation and cascade removal of related records
@@ -1725,6 +1779,35 @@ function renderPeralatan(){
     }).join('');
   }
 }
+
+function renderROBox(){
+  const list = document.getElementById('roBoxList');
+  const q = (document.getElementById('searchROBox') && document.getElementById('searchROBox').value || '').toLowerCase().trim();
+  if(!list) return;
+  const items = q ? DB.roBox.filter(p=>{
+    const hay = ((p.namaAlat||'') + ' ' + (p.kodeAlat||'') + ' ' + (p.noSeri||'') + ' ' + (p.merk||'')).toLowerCase();
+    return hay.includes(q);
+  }) : DB.roBox;
+  if(!items.length){
+    list.innerHTML = `<div class="empty-state"><p>Belum ada RO Box.<br>Tambahkan RO Box pertama untuk mulai mengelola datanya.</p></div>`;
+    return;
+  }
+  if(compactView){
+    list.innerHTML = `<table class="compact-table"><thead><tr><th>Kode / Nama RO Box</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead><tbody>${items.map(p=>{
+      const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
+      return `<tr onclick='openROBoxAction("${p.id}")' style="cursor:pointer;"><td><strong>${p.namaAlat||'-'}</strong>${p.kodeAlat?' · '+p.kodeAlat:''}</td><td><span class="badge ${badge}" style="text-transform:none;">${p.status||'-'}</span></td><td>${equipmentExpiryChipsHtml(p)||'-'}</td><td>${p.lokasi||''}${p.noSeri?' · '+p.noSeri:''}</td><td class="compact-actions">${canEditSection('ro-box')?`<button class="btn" onclick="event.stopPropagation(); openROBoxForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn" onclick="event.stopPropagation(); deleteROBox('${p.id}');">Hapus</button>`:''}</td></tr>`;
+    }).join('')}</tbody></table>`;
+    return;
+  }
+  list.innerHTML = items.map(p=>{
+    const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
+    const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
+    const monitoringHtml = equipmentExpiryChipsHtml(p);
+    return `<div class="item-card" onclick='openROBoxAction("${p.id}")' style="cursor:pointer;"><div class="item-row"><div style="display:flex; gap:12px; align-items:center;">${p.photo?`<img class="veh-thumb" src="${p.photo}" alt="${p.namaAlat}">`:'<div style="width:64px; height:44px; border-radius:8px; background:var(--surface2); border:1px solid rgba(7,18,36,0.04)"></div>'}<div><div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat||'-'}</div><div class="item-row" style="gap:8px; align-items:center;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status||'-'}</span></div><div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div></div></div><div style="text-align:right;"><div class="item-sub">${p.lokasi||''}</div><div class="item-sub">${p.noSeri||''}</div></div></div>${monitoringHtml?`<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">${monitoringHtml}</div>`:''}${canEditSection('ro-box')?`<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openROBoxForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteROBox('${p.id}')">Hapus</button></div>`:''}</div>`;
+  }).join('');
+}
+
+function deleteROBox(id){ roBoxMode = true; deletePeralatan(id); }
 
 function equipmentExpiryChipsHtml(p){
   const entries = [];
@@ -2080,19 +2163,23 @@ function renderKmHistory(){
 function openServiceForm(){
   // open form for new service or editing if an object is passed
   const existing = arguments[0] || null;
+  serviceRecordMode = arguments[1] === true || (existing && existing.roBoxId);
   if(!canEditSection('servis')){ showToast('Anda tidak memiliki akses edit servis', 'err'); return; }
-  if(!DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
+  if(serviceRecordMode && !DB.roBox.length){ showToast('Tambahkan RO Box dulu', 'err'); return; }
+  if(!serviceRecordMode && !DB.vehicles.length){ showToast('Tambahkan kendaraan dulu', 'err'); return; }
   const selectedVehicleExists = existing && DB.vehicles.some(v=>v.id===existing.vehicleId);
-  const selOptions = DB.vehicles.map(v=>`<option value="${v.id}" ${existing && v.id===existing.vehicleId ? 'selected' : ''}>${v.equipmentName||v.jenis||v.merk||'Equipment'} — ${v.plat}</option>`).join('') + `<option value="__other__" ${existing && !selectedVehicleExists ? 'selected' : ''}>Lainnya (isi sendiri)</option>`;
+  const selOptions = serviceRecordMode
+    ? DB.roBox.map(p=>`<option value="${p.id}" ${existing && p.id===existing.roBoxId ? 'selected' : ''}>${p.namaAlat||'RO Box'}${p.kodeAlat ? ' — '+p.kodeAlat : ''}</option>`).join('')
+    : DB.vehicles.map(v=>`<option value="${v.id}" ${existing && v.id===existing.vehicleId ? 'selected' : ''}>${v.equipmentName||v.jenis||v.merk||'Equipment'} — ${v.plat}</option>`).join('') + `<option value="__other__" ${existing && !selectedVehicleExists ? 'selected' : ''}>Lainnya (isi sendiri)</option>`;
   openSheet(`
     <div class="sheet-head">
-      <div class="sheet-title">${existing? 'Ubah servis' : 'Catat servis'}</div>
+      <div class="sheet-title">${serviceRecordMode ? (existing ? 'Ubah record RO Box' : 'Record RO Box') : (existing? 'Ubah servis' : 'Catat servis')}</div>
       <div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
     </div>
-    <div class="field"><label>Kendaraan</label>
+    <div class="field"><label>${serviceRecordMode ? 'RO Box' : 'Kendaraan'}</label>
       <select id="sVehicle" onchange="toggleOtherServiceVehicle()">${selOptions}</select>
     </div>
-    <div class="field" id="sOtherVehicleField" style="display:${existing && !selectedVehicleExists ? 'block' : 'none'}"><label>Nama kendaraan lainnya</label><input id="sOtherVehicle" placeholder="cth. Excavator EX-01" value="${existing && !selectedVehicleExists ? existing.vehicleName||'' : ''}"></div>
+    ${serviceRecordMode ? '' : `<div class="field" id="sOtherVehicleField" style="display:${existing && !selectedVehicleExists ? 'block' : 'none'}"><label>Nama kendaraan lainnya</label><input id="sOtherVehicle" placeholder="cth. Excavator EX-01" value="${existing && !selectedVehicleExists ? existing.vehicleName||'' : ''}"></div>`}
     <div class="field-row">
       <div class="field"><label>Tanggal</label><input id="sTanggal" type="date" value="${existing? existing.tanggal : todayStr()}"></div>
       <div class="field"><label>KM saat servis</label><input id="sKm" type="number" placeholder="cth. 45210" value="${existing && existing.km? existing.km : ''}"></div>
@@ -2112,7 +2199,7 @@ function openServiceForm(){
       <div class="field"><label>Biaya (Rp)</label><input id="sBiaya" type="number" placeholder="0" value="${existing? existing.biaya||0 : 0}"></div>
     </div>
     <div style="display:flex; gap:8px;">
-      <button class="btn btn-primary btn-full" onclick="saveService('${existing? existing.id : ''}')">Simpan servis</button>
+      <button class="btn btn-primary btn-full" onclick="saveService('${existing? existing.id : ''}')">${serviceRecordMode ? 'Simpan record RO Box' : 'Simpan servis'}</button>
       ${existing? `<button class="btn" onclick="openServiceDetail(${existing? JSON.stringify(existing).replace(/'/g,"&apos;") : ''})">Lihat</button>` : ''}
     </div>
     ${existing? `<div style="margin-top:8px;"><button class="btn btn-danger btn-full" onclick="deleteService('${existing.id}')">Hapus servis</button></div>` : ''}
@@ -2124,8 +2211,11 @@ function openServiceForm(){
   const setServiceSheetTitle = ()=>{
     const sel = document.getElementById('sVehicle'); if(!sel) return;
     const vv = DB.vehicles.find(x=>x.id===sel.value);
+    const rp = serviceRecordMode ? DB.roBox.find(x=>x.id===sel.value) : null;
     const titleEl = document.querySelector('#sheetContent .sheet-title');
-    if(titleEl) titleEl.textContent = vv ? `${existing? 'Ubah servis' : 'Catat servis'} — ${vv.equipmentName} (${vv.plat||''})` : (existing? 'Ubah servis' : 'Catat servis');
+    if(titleEl) titleEl.textContent = serviceRecordMode
+      ? `${existing ? 'Ubah record RO Box' : 'Record RO Box'}${rp ? ' — '+(rp.namaAlat||'RO Box') : ''}`
+      : (vv ? `${existing? 'Ubah servis' : 'Catat servis'} — ${vv.equipmentName} (${vv.plat||''})` : (existing? 'Ubah servis' : 'Catat servis'));
   };
   setServiceSheetTitle();
   const selEl = document.getElementById('sVehicle'); if(selEl) selEl.addEventListener('change', setServiceSheetTitle);
@@ -2137,17 +2227,23 @@ function toggleOtherServiceVehicle(){
   if(field) field.style.display = select && select.value === '__other__' ? 'block' : 'none';
 }
 
+function openROBoxRecordForm(existing){
+  openServiceForm(existing || null, true);
+}
+
 function saveService(id){
   if(!canEditSection('servis')){ showToast('Anda tidak memiliki akses edit servis', 'err'); return; }
   const selectedVehicle = document.getElementById('sVehicle').value;
-  const otherVehicleName = document.getElementById('sOtherVehicle').value.trim();
+  const otherVehicleField = document.getElementById('sOtherVehicle');
+  const otherVehicleName = otherVehicleField ? otherVehicleField.value.trim() : '';
   const vehicleId = selectedVehicle === '__other__' ? '' : selectedVehicle;
-  if(selectedVehicle === '__other__' && !otherVehicleName){ showToast('Isi nama kendaraan lainnya', 'err'); return; }
+  if(!serviceRecordMode && selectedVehicle === '__other__' && !otherVehicleName){ showToast('Isi nama kendaraan lainnya', 'err'); return; }
   const jenis = document.getElementById('sJenis').value.trim();
   if(!jenis){ showToast('Isi jenis servis', 'err'); return; }
   const payload = {
-    vehicleId,
-    vehicleName: selectedVehicle === '__other__' ? otherVehicleName : '',
+    vehicleId: serviceRecordMode ? '' : vehicleId,
+    vehicleName: serviceRecordMode ? '' : (selectedVehicle === '__other__' ? otherVehicleName : ''),
+    roBoxId: serviceRecordMode ? selectedVehicle : '',
     kategori: document.getElementById('sKategori').value,
     tanggal: document.getElementById('sTanggal').value || todayStr(),
     km: parseInt(document.getElementById('sKm').value,10) || null,
@@ -2162,18 +2258,21 @@ function saveService(id){
   } else {
     DB.services.push({ id: uid(), ...payload });
   }
+  const savedAsROBox = serviceRecordMode;
   closeSheet(); renderAll(); saveToSheet();
-  showToast('Servis tersimpan', 'ok');
+  serviceRecordMode = false;
+  showToast(savedAsROBox ? 'Record RO Box tersimpan' : 'Servis tersimpan', 'ok');
 }
 
 function openServiceAction(id){
   const s = DB.services.find(x=>x.id===id);
   if(!s) return;
   const serviceVehicle = DB.vehicles.find(v=>v.id===s.vehicleId);
-  const serviceVehicleLabel = serviceVehicle ? `${serviceVehicle.plat}${serviceVehicle.equipmentName ? ' — '+serviceVehicle.equipmentName : ''}` : (s.vehicleName||'Kendaraan lainnya');
+  const serviceROBox = DB.roBox.find(p=>p.id===s.roBoxId);
+  const serviceVehicleLabel = serviceROBox ? `${serviceROBox.namaAlat||'RO Box'}${serviceROBox.kodeAlat ? ' — '+serviceROBox.kodeAlat : ''}` : serviceVehicle ? `${serviceVehicle.plat}${serviceVehicle.equipmentName ? ' — '+serviceVehicle.equipmentName : ''}` : (s.vehicleName||'Kendaraan lainnya');
   if(canEditSection('servis')) openServiceForm(s); else {
     openSheet('<div class="sheet-head"><div class="sheet-title">Detail Servis</div><div class="icon-btn" onclick="closeSheet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>'+
-      `<div class="field"><label>Kendaraan</label><div class="readonly-value">${serviceVehicleLabel}</div></div>`+
+      `<div class="field"><label>${serviceROBox ? 'RO Box' : 'Kendaraan'}</label><div class="readonly-value">${serviceVehicleLabel}</div></div>`+
       `<div class="field-row"><div class="field"><label>Tanggal</label><div class="readonly-value">${s.tanggal}</div></div><div class="field"><label>KM</label><div class="readonly-value">${s.km||'-'}</div></div></div>`+
       `<div class="field-row"><div class="field"><label>Kategori</label><div class="readonly-value">${s.kategori||'-'}</div></div><div class="field"><label>Jenis</label><div class="readonly-value">${s.jenis}</div></div></div><div class="field"><label>Item</label><div class="readonly-value">${s.item||'-'}</div></div>`+
       `<div class="field-row"><div class="field"><label>Bengkel</label><div class="readonly-value">${s.bengkel||''}</div></div><div class="field"><label>Biaya</label><div class="readonly-value">${s.biaya?('Rp '+s.biaya.toLocaleString('id-ID')):'-'}</div></div></div>`
@@ -2219,11 +2318,18 @@ function serviceCategoryClass(category){
   return 'badge-service-preventive';
 }
 
+function serviceAssetType(service){
+  if(service.roBoxId) return 'ro-box';
+  if(service.peralatanId || service.alatId || service.assetType === 'peralatan') return 'peralatan';
+  return 'armada';
+}
+
 function renderServices(){
   const list = document.getElementById('serviceList');
   const q = (document.getElementById('searchService') && document.getElementById('searchService').value || '').toLowerCase().trim();
   populateServiceFilters();
   const category = document.getElementById('serviceCategoryFilter')?.value || '';
+  const assetType = document.getElementById('serviceAssetTypeFilter')?.value || '';
   const month = document.getElementById('serviceMonthFilter')?.value || '';
   const year = document.getElementById('serviceYearFilter')?.value || '';
   const equipment = document.getElementById('serviceEquipmentFilter')?.value || '';
@@ -2236,18 +2342,20 @@ function renderServices(){
     const serviceCategory = s.kategori || 'preventive';
     const serviceDate = s.tanggal || '';
     const matchesCategory = !category || serviceCategory === category;
+    const matchesAssetType = !assetType || serviceAssetType(s) === assetType;
     const matchesMonth = !month || serviceDate.slice(5,7) === month;
     const matchesYear = !year || serviceDate.slice(0,4) === year;
     const matchesEquipment = !equipment || (equipment.startsWith('vehicle:') ? s.vehicleId === equipment.slice(8) : !s.vehicleId && ('other:'+s.vehicleName) === equipment);
     const cost = Number(s.biaya) || 0;
     const matchesMinCost = minCost === null || cost >= minCost;
     const matchesMaxCost = maxCost === null || cost <= maxCost;
-    return matchesCategory && matchesMonth && matchesYear && matchesEquipment && matchesMinCost && matchesMaxCost;
+    return matchesCategory && matchesAssetType && matchesMonth && matchesYear && matchesEquipment && matchesMinCost && matchesMaxCost;
   });
   if(q){
     items = items.filter(s=>{
       const v = DB.vehicles.find(x=>x.id===s.vehicleId) || {};
-      const hay = ((v.plat||'') + ' ' + (v.equipmentName||'') + ' ' + (s.vehicleName||'') + ' ' + (s.kategori||'') + ' ' + (s.jenis||'') + ' ' + (s.item||'') + ' ' + (s.bengkel||'')).toLowerCase();
+      const roBox = DB.roBox.find(x=>x.id===s.roBoxId) || {};
+      const hay = ((v.plat||'') + ' ' + (v.equipmentName||'') + ' ' + (roBox.namaAlat||'') + ' ' + (roBox.kodeAlat||'') + ' ' + (s.vehicleName||'') + ' ' + (s.kategori||'') + ' ' + (s.jenis||'') + ' ' + (s.item||'') + ' ' + (s.bengkel||'')).toLowerCase();
       return hay.includes(q);
     });
   }
@@ -2257,14 +2365,16 @@ function renderServices(){
   }
   list.innerHTML = items.map(s=>{
     const v = DB.vehicles.find(x=>x.id===s.vehicleId);
+    const roBox = DB.roBox.find(x=>x.id===s.roBoxId);
     const serviceCategory = s.kategori || 'preventive';
-    const vehicleLabel = v ? (v.equipmentName + ' · ' + s.jenis) : ((s.vehicleName||'Kendaraan lainnya') + ' · ' + s.jenis);
+    const vehicleLabel = roBox ? ((roBox.namaAlat||'RO Box') + ' · ' + s.jenis) : v ? (v.equipmentName + ' · ' + s.jenis) : ((s.vehicleName||'Kendaraan lainnya') + ' · ' + s.jenis);
+    const recordLabel = roBox ? 'RO Box' : (v ? v.plat : 'Lainnya');
     return `<div class="item-card" onclick='openServiceAction("${s.id}")' style="cursor:pointer;">
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
-          ${v ? vehicleIcon(v) : '<div class="veh-icon" aria-hidden="true">+</div>'}
+          ${v ? vehicleIcon(v) : roBox && roBox.photo ? `<img class="veh-thumb" src="${roBox.photo}" alt="${roBox.namaAlat||'RO Box'}">` : '<div class="veh-icon" aria-hidden="true">+</div>'}
           <div>
-            <div class="item-row" style="gap:8px;"><span class="plate">${v?v.plat:'Lainnya'}</span><span class="item-title">${vehicleLabel}</span></div>
+            <div class="item-row" style="gap:8px;"><span class="plate">${recordLabel}</span><span class="item-title">${vehicleLabel}</span></div>
             <div class="badge ${serviceCategoryClass(serviceCategory)}" style="text-transform:none; margin-top:6px;">${serviceCategory === 'regular' ? 'Regular service' : serviceCategory}</div>
             <div class="item-sub">${s.item || '—'}</div>
             <div class="item-sub">${s.bengkel||''}${s.km?' · '+s.km.toLocaleString('id-ID')+' km':''}</div>
@@ -2275,7 +2385,7 @@ function renderServices(){
           ${s.biaya?`<div class="item-sub" style="color:var(--text);">Rp ${s.biaya.toLocaleString('id-ID')}</div>`:''}
         </div>
       </div>
-      ${canEditSection('servis')? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openServiceForm(${JSON.stringify(s).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteService('${s.id}')">Hapus</button></div>` : ''}
+      ${canEditSection('servis')? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openServiceForm(${JSON.stringify(s).replace(/'/g,"&apos;")}, ${s.roBoxId ? 'true' : 'false'});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteService('${s.id}')">Hapus</button></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -2675,6 +2785,7 @@ function renderAll(){
   renderDokumen();
   renderVehicles();
   renderPeralatan();
+  renderROBox();
   populateVehicleSelect();
   renderKmHistory();
   renderServices();
@@ -2845,7 +2956,7 @@ const I18N = {
     taggingTitle: 'Tagging & Dokumen Prioritas',
     evalTitle: 'Evaluasi Kinerja',
     trendTitle: 'Tren biaya maintenance (6 bulan)',
-    top5Title: 'Top 5 Corrective Action',
+    top5Title: 'Top 5 Maintenance Corrective Action',
     searchArmada: 'Cari kendaraan (plat, nama, kode)',
     labelVehicle: 'Kendaraan', labelTanggal: 'Tanggal', labelKm: 'KM saat ini', labelLiter: 'Liter BBM (opsional)', labelBiayaBbm: 'Biaya BBM (opsional)', labelCatatan: 'Catatan (opsional)',
     labelPlat: 'Plat nomor', labelTahun: 'Tahun', labelLokasi: 'Lokasi/area', labelStatus: 'Status', labelEquipCode: 'Kode Equipment', labelEquipName: 'Nama Equipment',
@@ -2873,7 +2984,7 @@ const I18N = {
     taggingTitle: 'Tagging & Document Priority',
     evalTitle: 'Performance Evaluation',
     trendTitle: 'Maintenance cost trend (6 months)',
-    top5Title: 'Top 5 problematic vehicles',
+    top5Title: 'Top 5 Maintenance Corrective Action',
     searchArmada: 'Search vehicle (plat, name, code)',
     labelVehicle: 'Vehicle', labelTanggal: 'Date', labelKm: 'Odometer (km)', labelLiter: 'Fuel liters (optional)', labelBiayaBbm: 'Fuel cost (optional)', labelCatatan: 'Notes (optional)',
     labelPlat: 'Plate number', labelTahun: 'Year', labelLokasi: 'Location/area', labelStatus: 'Status', labelEquipCode: 'Equipment code', labelEquipName: 'Equipment name',
