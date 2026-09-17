@@ -199,6 +199,9 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
 .veh-thumb{width:64px; height:44px; object-fit:cover; border-radius:8px; border:1px solid rgba(7,18,36,0.04);} 
 /* fleet number badge shown on list cards */
 .fleet-number{display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:linear-gradient(180deg, rgba(37,99,235,0.08), rgba(37,99,235,0.02)); color:var(--primary); font-weight:800; font-family:var(--font-mono); margin-right:8px;}
+.pagination{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;}
+.pagination-info{font-size:12px; color:var(--muted); min-width:110px; text-align:center;}
+.pagination .btn{padding:8px 12px; font-size:13px;}
 /* bilingual support: English shown in small italic when enabled */
 [data-show-en="false"] .eng{display:none}
 [data-show-en="true"] .eng{display:inline}
@@ -816,6 +819,9 @@ let serviceRecordMode = false;
 let reportFilter = "all";
 let dokumenFilter = "all";
 let activeScreen = "dashboard";
+const LIST_PAGE_SIZE = 8;
+let servicePage = 1;
+let reportPage = 1;
 
 // Reference date (YYYY-MM-DD) used when calculating days until expiry.
 // This is set when the page loads and updated after a successful sync,
@@ -990,6 +996,20 @@ function clearSearch(id){
   if(id==='searchService') renderServices();
   if(id==='searchReport') renderReports();
 }
+
+function renderPagination(page, totalItems, setPageFn){
+  const totalPages = Math.max(1, Math.ceil(totalItems / LIST_PAGE_SIZE));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  if(totalItems <= LIST_PAGE_SIZE) return '';
+  return `<div class="pagination">
+    <button class="btn" ${safePage===1?'disabled':''} onclick="${setPageFn}(${safePage-1})">Sebelumnya</button>
+    <span class="pagination-info">Halaman ${safePage} / ${totalPages}</span>
+    <button class="btn" ${safePage===totalPages?'disabled':''} onclick="${setPageFn}(${safePage+1})">Berikutnya</button>
+  </div>`;
+}
+
+function setServicePage(page){ servicePage = page; renderServices(); }
+function setReportPage(page){ reportPage = page; renderReports(); }
 
 async function syncFromSheet(){
   if(CONFIG.scriptUrl.startsWith("ISI_")){
@@ -1755,15 +1775,15 @@ function renderPeralatan(){
   if(compactView){
     list.innerHTML = `
       <table class="compact-table">
-        <thead><tr><th>Kode / Nama Alat</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
+        <thead><tr><th>No.</th><th>Kode / Nama Alat</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead>
         <tbody>
-          ${items.map(p=>{
+          ${items.map((p,i)=>{
             const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
             const name = p.namaAlat || '-';
             const code = p.kodeAlat ? (' · ' + p.kodeAlat) : '';
             const monitoringHtml = equipmentExpiryChipsHtml(p);
             return `<tr onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
-              <td><strong>${name}</strong>${code}</td>
+              <td><div class="fleet-number">${i+1}</div></td><td><strong>${name}</strong>${code}</td>
               <td><span class="badge ${badge}" style="text-transform:none;">${p.status}</span></td>
               <td>${monitoringHtml || '-'}</td>
               <td>${p.lokasi||''}${p.noSeri? ' · ' + p.noSeri : ''}</td>
@@ -1773,14 +1793,14 @@ function renderPeralatan(){
         </tbody>
       </table>`;
   } else {
-    list.innerHTML = items.map(p=>{
+    list.innerHTML = items.map((p,i)=>{
       const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
       const monitoringHtml = equipmentExpiryChipsHtml(p);
       const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
       return `<div class="item-card" onclick='openPeralatanAction("${p.id}")' style="cursor:pointer;">
           <div class="item-row">
             <div style="display:flex; gap:12px; align-items:center;">
-              ${p.photo ? `<img class="veh-thumb" src="${p.photo}" alt="${p.namaAlat}">` : `<div style="width:64px; height:44px; border-radius:8px; background:var(--surface2); border:1px solid rgba(7,18,36,0.04)"></div>`}
+              <div class="fleet-number">${i+1}</div>${p.photo ? `<img class="veh-thumb" src="${p.photo}" alt="${p.namaAlat}">` : `<div style="width:64px; height:44px; border-radius:8px; background:var(--surface2); border:1px solid rgba(7,18,36,0.04)"></div>`}
               <div>
                 <div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat}</div>
                 <div class="item-row" style="gap:8px; align-items:center;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status}</span></div>
@@ -1811,18 +1831,24 @@ function renderROBox(){
     return;
   }
   if(compactView){
-    list.innerHTML = `<table class="compact-table"><thead><tr><th>Kode / Nama RO Box</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead><tbody>${items.map(p=>{
+    list.innerHTML = `<table class="compact-table"><thead><tr><th>No.</th><th>Kode / Nama RO Box</th><th>Status</th><th>Monitoring</th><th>Lokasi / Seri</th><th style="width:140px">Aksi</th></tr></thead><tbody>${items.map((p,i)=>{
       const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
       return `<tr onclick='openROBoxAction("${p.id}")' style="cursor:pointer;"><td><strong>${p.namaAlat||'-'}</strong>${p.kodeAlat?' · '+p.kodeAlat:''}</td><td><span class="badge ${badge}" style="text-transform:none;">${p.status||'-'}</span></td><td>${equipmentExpiryChipsHtml(p)||'-'}</td><td>${p.lokasi||''}${p.noSeri?' · '+p.noSeri:''}</td><td class="compact-actions">${canEditSection('ro-box')?`<button class="btn" onclick="event.stopPropagation(); openROBoxForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn" onclick="event.stopPropagation(); deleteROBox('${p.id}');">Hapus</button>`:''}</td></tr>`;
     }).join('')}</tbody></table>`;
     return;
   }
-  list.innerHTML = items.map(p=>{
+  list.innerHTML = items.map((p,i)=>{
     const badge = p.status==='aktif' ? 'badge-ok' : p.status==='rusak' ? 'badge-warn' : 'badge-idle';
     const subLine = [p.merk, p.model, p.jenisAlat, p.kapasitas].filter(Boolean).join(' · ');
     const monitoringHtml = equipmentExpiryChipsHtml(p);
     return `<div class="item-card" onclick='openROBoxAction("${p.id}")' style="cursor:pointer;"><div class="item-row"><div style="display:flex; gap:12px; align-items:center;">${p.photo?`<img class="veh-thumb" src="${p.photo}" alt="${p.namaAlat}">`:'<div style="width:64px; height:44px; border-radius:8px; background:var(--surface2); border:1px solid rgba(7,18,36,0.04)"></div>'}<div><div class="item-title" style="font-family:var(--font-display); font-size:15.5px; color:var(--primary); margin-bottom:4px;">${p.namaAlat||'-'}</div><div class="item-row" style="gap:8px; align-items:center;">${p.kodeAlat?`<span class="plate">${p.kodeAlat}</span>`:''}<span class="badge ${badge}">${p.status||'-'}</span></div><div class="item-sub" style="margin-top:4px;">${subLine||'-'}</div></div></div><div style="text-align:right;"><div class="item-sub">${p.lokasi||''}</div><div class="item-sub">${p.noSeri||''}</div></div></div>${monitoringHtml?`<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">${monitoringHtml}</div>`:''}${canEditSection('ro-box')?`<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openROBoxForm(${JSON.stringify(p).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteROBox('${p.id}')">Hapus</button></div>`:''}</div>`;
   }).join('');
+  if(!compactView){
+    list.querySelectorAll('.item-card').forEach((card, index)=>{
+      const row = card.querySelector('.item-row > div');
+      if(row && !row.querySelector('.fleet-number')) row.insertAdjacentHTML('afterbegin', `<div class="fleet-number">${index+1}</div>`);
+    });
+  }
 }
 
 function deleteROBox(id){ roBoxMode = true; deletePeralatan(id); }
@@ -2382,7 +2408,12 @@ function renderServices(){
     list.innerHTML = `<div class="empty-state"><p>Belum ada riwayat servis.</p></div>`;
     return;
   }
-  list.innerHTML = items.map(s=>{
+  const totalServicePages = Math.max(1, Math.ceil(items.length / LIST_PAGE_SIZE));
+  servicePage = Math.min(Math.max(1, servicePage), totalServicePages);
+  const serviceStart = (servicePage - 1) * LIST_PAGE_SIZE;
+  const pagedItems = items.slice(serviceStart, serviceStart + LIST_PAGE_SIZE);
+  list.innerHTML = pagedItems.map((s,pageIndex)=>{
+    const itemNumber = serviceStart + pageIndex + 1;
     const v = DB.vehicles.find(x=>x.id===s.vehicleId);
     const roBox = DB.roBox.find(x=>x.id===s.roBoxId);
     const serviceCategory = s.kategori || 'preventive';
@@ -2391,6 +2422,7 @@ function renderServices(){
     return `<div class="item-card" onclick='openServiceAction("${s.id}")' style="cursor:pointer;">
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
+          <div class="fleet-number">${itemNumber}</div>
           ${v ? vehicleIcon(v) : roBox && roBox.photo ? `<img class="veh-thumb" src="${roBox.photo}" alt="${roBox.namaAlat||'RO Box'}">` : '<div class="veh-icon" aria-hidden="true">+</div>'}
           <div>
             <div class="item-row" style="gap:8px;"><span class="plate">${recordLabel}</span><span class="item-title">${vehicleLabel}</span></div>
@@ -2406,7 +2438,7 @@ function renderServices(){
       </div>
       ${canEditSection('servis')? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openServiceForm(${JSON.stringify(s).replace(/'/g,"&apos;")}, ${s.roBoxId ? 'true' : 'false'});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteService('${s.id}')">Hapus</button></div>` : ''}
     </div>`;
-  }).join('');
+  }).join('') + renderPagination(servicePage, items.length, 'setServicePage');
 }
 
 function openServiceMonthFilter(monthKey){
@@ -2578,12 +2610,18 @@ function renderReports(){
     list.innerHTML = `<div class="empty-state"><p>Tidak ada laporan.</p></div>`;
     return;
   }
-  list.innerHTML = items.map(r=>{
+  const totalReportPages = Math.max(1, Math.ceil(items.length / LIST_PAGE_SIZE));
+  reportPage = Math.min(Math.max(1, reportPage), totalReportPages);
+  const reportStart = (reportPage - 1) * LIST_PAGE_SIZE;
+  const pagedItems = items.slice(reportStart, reportStart + LIST_PAGE_SIZE);
+  list.innerHTML = pagedItems.map((r,pageIndex)=>{
+    const itemNumber = reportStart + pageIndex + 1;
     const v = DB.vehicles.find(x=>x.id===r.vehicleId) || {};
     const badge = r.status==='open' ? 'badge-warn' : 'badge-ok';
     return `<div class="item-card" onclick="openReportDetail('${r.id}')" style="cursor:pointer;">
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
+          <div class="fleet-number">${itemNumber}</div>
           ${vehicleIcon(v)}
           <div>
             <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${v.plat||'?'}</span><span class="item-title">${v.equipmentName||''}</span><span class="badge ${badge}">${r.status}</span></div>
@@ -2597,7 +2635,7 @@ function renderReports(){
       </div>
       ${canEditSection('laporan')? `<div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;"><button class="btn" onclick="event.stopPropagation(); openReportForm(${JSON.stringify(r).replace(/'/g,"&apos;")});">Ubah</button><button class="btn btn-danger" onclick="event.stopPropagation(); deleteReport('${r.id}')">Hapus</button></div>` : ''}
     </div>`;
-  }).join('');
+  }).join('') + renderPagination(reportPage, items.length, 'setReportPage');
 }
 
 /* ============================================================
@@ -2902,6 +2940,7 @@ function renderDokumen(){
     return `<div class="item-card" onclick='${openCall}'>
       <div class="item-row">
         <div style="display:flex; gap:12px; align-items:center;">
+          <div class="fleet-number">${i+1}</div>
           <div class="veh-icon">${vehicleIcon(it.type==='vehicle'? DB.vehicles.find(v=>v.id===it.id) : DB.peralatan.find(p=>p.id===it.id))}</div>
           <div style="min-width:260px;">
             <div class="item-row" style="gap:8px; align-items:center;"><span class="plate">${it.plate}</span></div>
