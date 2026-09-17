@@ -773,7 +773,7 @@ button, input, select, textarea{font-family:inherit; color:inherit;}
    4. Salin "Web app URL" yang muncul, tempel di bawah ini
 */
 const CONFIG = {
-  scriptUrl: "https://script.google.com/macros/s/AKfycby_NpR6StrfLYDOxhqfknxKsrIfLMQUpKrKwutWcbtKJrpVAxPg8Fwlqt1TQhokkgLyrA/exec",
+  scriptUrl: "https://script.google.com/macros/s/AKfycbwxIkZFWwqYj0QHytiJu1IeJPRIh0nyyzNZd_KWQ-hzLcwRlTOhR-lP9fuSg0ue5Luf/exec",
 };
 
 // SUKET default validity (months) used to auto-calculate expired date from issued date
@@ -793,7 +793,6 @@ window.addEventListener('unhandledrejection', (ev)=>{
 // Ensure the sync pill remains functional even if some other code fails to bind handlers.
 document.addEventListener('DOMContentLoaded', ()=>{
   const sp = document.getElementById('syncPill');
-  if(sp){ sp.addEventListener('click', ()=>{ try{ if(typeof handleSyncClick==='function') handleSyncClick(); else { alert('Sync unavailable — check console for errors'); } }catch(e){ console.error('sync click error', e); alert('Sync error: '+e.message); } }); }
   // Ensure gate button and name input are wired even if inline handlers fail
   const gateBtn = document.getElementById('gateBtn');
   const nameInput = document.getElementById('nameInput');
@@ -997,11 +996,17 @@ async function syncFromSheet(){
     setSyncStatus('err', 'belum diatur');
     return;
   }
+  if(window.location.protocol === 'file:'){
+    setSyncStatus('err', 'buka via HTTP');
+    showToast('Sinkronisasi tidak bisa dari file lokal. Buka melalui server HTTP atau hosting.', 'err');
+    return;
+  }
   setSyncStatus('busy', 'menyinkronkan…');
   try{
-    const res = await fetch(CONFIG.scriptUrl);
+    const res = await fetch(CONFIG.scriptUrl, { cache: 'no-store' });
     if(!res.ok) throw new Error("Gagal mengambil data (" + res.status + ")");
     const parsed = await res.json();
+    if(!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Respons Apps Script bukan JSON data yang valid');
     const hasRemoteROBox = Object.prototype.hasOwnProperty.call(parsed, 'roBox') || Object.prototype.hasOwnProperty.call(parsed, 'robox') || Object.prototype.hasOwnProperty.call(parsed, 'rOBox');
     DB = {
       vehicles: (parsed.vehicles || []).map(normalizeRow),
@@ -1019,7 +1024,11 @@ async function syncFromSheet(){
     renderAll();
   }catch(e){
     setSyncStatus('err', 'gagal sinkron');
-    showToast('Sinkron gagal: ' + e.message, 'err');
+    const detail = e instanceof TypeError
+      ? 'Koneksi diblokir browser (CORS), URL tidak aktif, atau akses Web App belum Anyone.'
+      : e.message;
+    showToast('Sinkron gagal: ' + detail, 'err');
+    console.error('syncFromSheet failed', e);
   }
 }
 
@@ -1122,6 +1131,11 @@ function setPeralatanPhotoByIdentifier(identifier, url){
 }
 
 async function saveToSheet(){
+  if(window.location.protocol === 'file:'){
+    setSyncStatus('err', 'buka via HTTP');
+    showToast('Data belum tersimpan. Buka aplikasi melalui server HTTP atau hosting.', 'err');
+    return;
+  }
   setSyncStatus('busy', 'menyimpan…');
   try{
     const res = await fetch(CONFIG.scriptUrl, {
@@ -1133,7 +1147,11 @@ async function saveToSheet(){
     setSyncStatus('ok', 'tersinkron');
   }catch(e){
     setSyncStatus('err', 'gagal simpan');
-    showToast('Gagal menyimpan ke Google Sheet: ' + e.message, 'err');
+    const detail = e instanceof TypeError
+      ? 'Koneksi diblokir browser (CORS), URL tidak aktif, atau akses Web App belum Anyone.'
+      : e.message;
+    showToast('Gagal menyimpan ke Google Sheet: ' + detail, 'err');
+    console.error('saveToSheet failed', e);
   }
 }
 
@@ -2297,17 +2315,18 @@ function populateServiceFilters(){
   if(!yearFilter || !equipmentFilter) return;
   const currentYear = yearFilter.value;
   const currentEquipment = equipmentFilter.value;
-  const years = Array.from(new Set(DB.services.map(s=>(s.tanggal||'').slice(0,4)).filter(Boolean))).sort((a,b)=>b.localeCompare(a));
+  const years = Array.from(new Set(DB.services.map(s=>String(s.tanggal||'').slice(0,4)).filter(Boolean))).sort((a,b)=>String(b).localeCompare(String(a)));
   yearFilter.innerHTML = '<option value="">Semua tahun</option>' + years.map(year=>`<option value="${year}">${year}</option>`).join('');
   yearFilter.value = years.includes(currentYear) ? currentYear : '';
 
   const equipmentOptions = [];
   DB.vehicles.forEach(v=>equipmentOptions.push({value:'vehicle:'+v.id, label:(v.equipmentName||v.plat||'Equipment tanpa nama') + (v.plat ? ' — '+v.plat : '')}));
   DB.services.filter(s=>!s.vehicleId && s.vehicleName).forEach(s=>{
-    const value = 'other:'+s.vehicleName;
-    if(!equipmentOptions.some(option=>option.value===value)) equipmentOptions.push({value, label:s.vehicleName});
+    const vehicleName = String(s.vehicleName);
+    const value = 'other:'+vehicleName;
+    if(!equipmentOptions.some(option=>option.value===value)) equipmentOptions.push({value, label:vehicleName});
   });
-  equipmentOptions.sort((a,b)=>a.label.localeCompare(b.label));
+  equipmentOptions.sort((a,b)=>String(a.label).localeCompare(String(b.label)));
   equipmentFilter.innerHTML = '<option value="">Semua equipment</option>' + equipmentOptions.map(option=>`<option value="${option.value}">${option.label}</option>`).join('');
   equipmentFilter.value = equipmentOptions.some(option=>option.value===currentEquipment) ? currentEquipment : '';
 }
@@ -2337,7 +2356,7 @@ function renderServices(){
   const maxCostValue = document.getElementById('serviceMaxCost')?.value || '';
   const minCost = minCostValue === '' ? null : Number(minCostValue);
   const maxCost = maxCostValue === '' ? null : Number(maxCostValue);
-  let items = [...DB.services].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  let items = [...DB.services].sort((a,b)=>String(b.tanggal||'').localeCompare(String(a.tanggal||'')));
   items = items.filter(s=>{
     const serviceCategory = s.kategori || 'preventive';
     const serviceDate = s.tanggal || '';
